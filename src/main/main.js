@@ -1,8 +1,14 @@
+// Load environment variables from .env file
+require('dotenv').config();
+
 const { app, BrowserWindow, globalShortcut, ipcMain } = require('electron');
 const path = require('path');
 const { captureScreen } = require('./capture');
 const { createOverlay, destroyOverlay } = require('./overlay-manager');
 const { extractRegion } = require('./region-extractor');
+const { convertBufferToPNGBase64 } = require('./image-converter');
+const { sendImageToGemini, extractLaTeXFromResponse } = require('./gemini-client');
+const { copyToClipboard } = require('./clipboard-handler');
 
 // Application state
 let appState = 'idle';
@@ -49,29 +55,68 @@ async function handleScreenshotShortcut() {
 }
 
 // IPC Handlers
-ipcMain.on('selection-complete', (event, rect) => {
+ipcMain.on('selection-complete', async (event, rect) => {
   console.log('Selection complete:', rect);
+  
+  // Prevent multiple simultaneous processing requests
+  if (appState === 'processing') {
+    console.log('Already processing a request, ignoring');
+    return;
+  }
+  
+  // Store screenshot data before cleanup
+  const screenshotBuffer = screenshotData.buffer;
+  const screenshotWidth = screenshotData.width;
+  const screenshotHeight = screenshotData.height;
+  
+  // Destroy overlay immediately after selection (before API call)
+  destroyOverlay();
+  appState = 'processing';
   
   try {
     // Extract region from original buffer
+    console.log('Extracting region...');
     const croppedImage = extractRegion(
-      screenshotData.buffer,
-      screenshotData.width,
-      screenshotData.height,
+      screenshotBuffer,
+      screenshotWidth,
+      screenshotHeight,
       rect
     );
     
     console.log(`Extracted region: ${rect.width}x${rect.height}`);
     
-    // TODO Phase 2: Send to Gemini API
-    // For now, just log success
-    console.log('Region extracted successfully');
+    // Convert RGBA buffer to PNG base64
+    console.log('Converting image to PNG...');
+    const base64Image = await convertBufferToPNGBase64(
+      croppedImage,
+      rect.width,
+      rect.height
+    );
+    
+    console.log('Image converted to base64, sending to Gemini API...');
+    
+    // Send to Gemini API
+    const apiResponse = await sendImageToGemini(base64Image);
+    
+    // Extract LaTeX from response
+    console.log('Parsing API response...');
+    const latex = extractLaTeXFromResponse(apiResponse);
+    
+    console.log('LaTeX extracted:', latex);
+    
+    // Copy to clipboard
+    const clipboardSuccess = copyToClipboard(latex);
+    if (!clipboardSuccess) {
+      console.warn('Warning: Failed to copy LaTeX to clipboard, but LaTeX was extracted successfully');
+    }
+    
+    console.log('Process completed successfully');
     
   } catch (error) {
-    console.error('Region extraction failed:', error);
+    console.error('Error during processing:', error.message);
+    // Errors are logged but don't prevent cleanup
   } finally {
-    // Cleanup
-    destroyOverlay();
+    // Final cleanup
     screenshotData = null;
     appState = 'idle';
   }
