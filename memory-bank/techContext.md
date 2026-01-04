@@ -3,50 +3,45 @@
 ## Technologies Used
 
 ### Core Framework
-- **Electron**: Cross-platform desktop application framework
-  - Version: Latest stable (TBD)
-  - Usage: Main process for system integration, renderer for UI
+- **Electron**: v28.0.0 - Desktop application framework
+- **WebGL**: GPU-accelerated rendering
+- **Node.js**: Runtime environment
 
-### Screenshot Libraries (Under Evaluation)
+### Screenshot Implementation
 - **desktopCapturer** (Electron built-in)
-  - Pros: No dependencies, built-in
-  - Cons: May require more setup for overlay scenarios
-- **screenshot-desktop** (npm package)
-  - Pros: Simple API, good cross-platform support
-  - Cons: External dependency
+  - Chosen for zero external dependencies
+  - Captures at physical resolution with DPI scaling
 
 ### Development Tools
-- **Node.js**: Runtime environment
-- **npm/yarn**: Package manager
-- **TypeScript** (Optional): Type safety (to be decided)
+- **npm**: Package manager
+- **JavaScript**: No TypeScript (keeping simple)
 
 ## Development Setup
 
-### Project Structure (Proposed)
+### Project Structure (Implemented)
 ```
 gpix/
 ├── src/
 │   ├── main/
-│   │   ├── main.js          # Main process entry
-│   │   ├── shortcut.js      # Global shortcut handler
-│   │   ├── screenshot.js    # Screenshot capture module
-│   │   ├── overlay.js       # Overlay window manager
-│   │   ├── selection.js     # Selection handler
-│   │   └── extractor.js     # Region extraction
+│   │   ├── main.js              # Entry point, global shortcut
+│   │   ├── capture.js           # Screenshot capture (desktopCapturer)
+│   │   ├── overlay-manager.js   # Overlay window lifecycle
+│   │   ├── preload.js           # IPC bridge
+│   │   └── region-extractor.js  # Crop selected region
 │   └── renderer/
-│       └── overlay.html     # Overlay window UI
+│       ├── overlay.html         # Minimal HTML shell
+│       ├── overlay.js           # WebGL rendering & input
+│       └── shaders.js           # GLSL shader programs
 ├── package.json
-└── README.md
+├── README.md
+└── TESTING.md
 ```
 
-### Dependencies (Initial)
+### Dependencies
 ```json
 {
-  "devDependencies": {
-    "electron": "^latest"
-  },
-  "optionalDependencies": {
-    "screenshot-desktop": "^latest"
+  "dependencies": {
+    "electron": "^28.0.0"
   }
 }
 ```
@@ -55,68 +50,65 @@ gpix/
 
 ### Platform-Specific Considerations
 
-#### Windows
-- Global shortcuts may require elevated permissions in some cases
-- Window transparency supported
-- Full-screen overlay works well
+#### Windows (Primary Platform)
+- DPI scaling handled via `screen.getPrimaryDisplay().scaleFactor`
+- Window transparency fully supported
+- Global shortcut works (hidden window maintains app presence)
 
 #### macOS
 - Global shortcuts require accessibility permissions
-- Transparency works well
-- May need different window management approach
+- Cross-platform compatible but not primary focus
 
-### Electron Limitations
-- Global shortcuts only work when app has focus initially (need to keep hidden window)
-- Transparency performance varies by OS
-- Full-screen overlay may conflict with some applications
+### Electron Implementation Details
+- Hidden window required to maintain global shortcut
+- Context isolation enabled for security
+- Preload script bridges IPC communication
+- Single monitor support (primary display only)
 
 ## Dependencies
 
-### Core Dependencies
-- **electron**: Desktop application framework
+### Production
+- **electron**: ^28.0.0 (only dependency)
 
-### Optional/Future Dependencies
-- **screenshot-desktop**: If desktopCapturer doesn't meet needs
-- **axios** or **node-fetch**: For Phase 2 API calls
-
-### Development Dependencies
-- Standard Node.js development tools
-- Linter/formatter (to be configured)
+### Future (Phase 2)
+- Gemini API client (TBD)
+- HTTP client for API calls
 
 ## Tool Usage Patterns
 
-### Electron IPC Communication
-- Main process → Renderer: `webContents.send()`
-- Renderer → Main: `ipcRenderer.send()` / `ipcRenderer.invoke()`
-
-### Window Creation Pattern
+### Electron IPC (Implemented)
 ```javascript
-new BrowserWindow({
-  // Configuration
-  show: false,  // Create hidden, then show
-  // ...
-})
+// Main → Renderer
+overlayWindow.webContents.send('screenshot-data', data);
+
+// Renderer → Main (via preload)
+window.electronAPI.sendSelectionComplete(rect);
+window.electronAPI.sendSelectionCancelled();
 ```
 
-### Global Shortcut Pattern
+### WebGL Rendering Pipeline
+1. Create texture from screenshot buffer (once)
+2. Update uniforms during drag (4 floats/frame)
+3. Fragment shader applies dimming/masking
+4. Separate border shader for red rectangle
+
+### DPI Coordinate Mapping
 ```javascript
-globalShortcut.register('CommandOrControl+Shift+S', () => {
-  // Trigger screenshot workflow
-})
+// Logical → Physical
+physicalX = Math.round(logicalX * scaleFactor);
 ```
 
 ## Configuration
 
 ### Hard-coded Settings (Phase 1)
-- Global shortcut key combination
-- Overlay window configuration
-- Dimming level (brightness value)
-- Selection rectangle color/style
+- Global shortcut: `Ctrl+Shift+S`
+- Dimming: 0.5 brightness
+- Border: Red (#FF0000), 2px
+- Min selection: 5x5 pixels
 
-### Future Configuration Needs (Phase 2)
+### Future (Phase 2)
 - API key storage
-- Customizable shortcut
-- Prompt templates
+- Customizable shortcuts
 - Result display preferences
 
 ## Build & Distribution

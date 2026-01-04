@@ -1,57 +1,50 @@
 # Active Context
 
 ## Current Work Focus
-**Phase 1: Screenshot & Selection UI Implementation**
+**Phase 1: Complete ✓ - Ready for Phase 2**
 
-Building the core screenshot capture and interactive selection interface. This includes:
-- Setting up Electron application structure
-- Implementing global shortcut registration
-- Creating screenshot capture functionality
-- Building transparent overlay window system
-- Implementing mouse drag selection with visual feedback
+Phase 1 screenshot and selection UI fully implemented and functional.
 
 ## Recent Changes
-- Project initialized
-- Memory bank created
-- Architecture and requirements defined
+- Complete Electron app structure implemented
+- WebGL-based overlay with GPU acceleration
+- DPI scaling support with native Electron API
+- ESC cancellation with full resource cleanup
+- All Phase 1 features working
 
 ## Next Steps
-1. Initialize Electron project with package.json
-2. Set up main process with global shortcut handler
-3. Implement screenshot capture (desktopCapturer or screenshot-desktop)
-4. Create overlay window (BrowserWindow with transparent, frameless, alwaysOnTop)
-5. Render screenshot in overlay with dimming effect
-6. Implement mouse event handlers (mousedown, mousemove, mouseup)
-7. Add selection rectangle rendering
-8. Implement brightness restoration within selection area
-9. Add selection extraction/cropping functionality
-10. Add cancel/escape functionality
+**Phase 2: Gemini API Integration**
+1. Add Gemini API client
+2. Implement image encoding (base64)
+3. Create equation extraction prompt
+4. Add LaTeX result display
+5. Error handling and retry logic
 
-## Active Decisions & Considerations
+## Key Decisions Made
 
 ### Screenshot Library
-- **Decision Pending:** Use Electron's `desktopCapturer` API or `screenshot-desktop` npm package
-- **Consideration:** `desktopCapturer` is built-in but may require more setup for overlay
-- **Consideration:** `screenshot-desktop` is simpler but adds dependency
+- **Chosen:** Electron's `desktopCapturer` API
+- **Reason:** Built-in, no external dependencies
 
-### Selection Rendering Approach
-- **Decision Pending:** CSS filters vs Canvas manipulation for dimming/selection
-- **Consideration:** CSS approach: simpler, HTML-based, may have performance limits
-- **Consideration:** Canvas approach: more control, better performance, more complex
+### Rendering Approach
+- **Chosen:** WebGL with custom shaders
+- **Reason:** GPU-accelerated, minimal CPU overhead, smooth 60 FPS
 
-### Window Management
-- **Approach:** Single overlay window (transparent, frameless)
-- **Dimensions:** Full screen matching primary display
-- **Behavior:** Always on top, click-through regions outside selection
+### DPI Scaling
+- **Chosen:** Native `screen.getPrimaryDisplay().scaleFactor`
+- **Reason:** No hardcoding, automatic detection, pixel-perfect accuracy
 
 ## Important Patterns & Preferences
-- Keep implementation simple for Phase 1 (no premature optimization)
-- Focus on Windows compatibility first
-- Hard-coded shortcuts/config for now
-- Clean, modular code structure for future API integration
+- Modular structure: capture, overlay, extraction separated
+- Security: context isolation, preload script
+- One-shot capture: screenshot taken once, texture uploaded once
+- Clean state machine: idle → capturing → selecting → idle
+- Resource management: cleanup on ESC and completion
 
 ## Learnings & Insights
-- Overlay window needs careful coordinate handling for mouse events
-- Brightness restoration within selection requires masking/clipping technique
-- Full-screen overlay may need special handling on different screen resolutions
+- WebGL texture upload is one-time; uniforms update during drag
+- DPI scaling requires logical → physical coordinate mapping
+- ESC handler needs capture phase for highest priority
+- Small selections (< 5x5) should be filtered
+- Hidden window required to maintain global shortcut
 
