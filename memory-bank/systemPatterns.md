@@ -98,10 +98,18 @@
 5. Overlay destroyed, extracted region returned
 
 ### Brightness Restoration Technique
-**Approach:** Canvas-based clipping or CSS masking
-- Full screenshot rendered dimmed
-- Selection rectangle area clipped/masked with normal brightness
-- Red border rendered on top layer
+**Approach:** WebGL shader-based dimming
+- Full screenshot rendered dimmed (0.5 brightness multiplier)
+- Selection rectangle area masked with normal brightness via fragment shader
+- Red border rendered on top layer with separate border shader
+
+### WebGL Coordinate System Handling
+**Critical Implementation Detail:**
+- Bitmap data from Electron's `toBitmap()` has top-left origin (Y=0 at top)
+- WebGL textures use bottom-left origin by default (Y=0 at bottom)
+- Solution: Flip Y coordinate in vertex shader: `v_texCoord = vec2(texCoord.x, 1.0 - texCoord.y)`
+- After flip, fragment shader texture coordinates match screen coordinates (top-left origin)
+- Selection rectangles use screen coordinates directly without additional transformation
 
 ## Design Patterns in Use
 

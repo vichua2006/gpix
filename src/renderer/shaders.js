@@ -8,7 +8,10 @@ varying vec2 v_texCoord;
 
 void main() {
   // Convert from clip space (-1 to 1) to texture space (0 to 1)
-  v_texCoord = a_position * 0.5 + 0.5;
+  // Flip Y coordinate: WebGL textures have origin at bottom-left,
+  // but bitmap data from toBitmap() has origin at top-left
+  vec2 texCoord = a_position * 0.5 + 0.5;
+  v_texCoord = vec2(texCoord.x, 1.0 - texCoord.y);
   gl_Position = vec4(a_position, 0.0, 1.0);
 }
 `;

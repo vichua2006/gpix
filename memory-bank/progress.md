@@ -42,7 +42,10 @@
 **Next Milestone:** Gemini API integration for LaTeX conversion
 
 ## Known Issues
-- None - all Phase 1 features working as designed
+- None - all Phase 1 features working correctly
+- Previously fixed: Image flip (180° rotation) - resolved by Y-coordinate flip in vertex shader
+- Previously fixed: Selection rectangle vertical inversion - resolved by using screen coordinates directly (texture coordinates already flipped)
+- Previously fixed: Global shortcut error message - resolved by changing to informational message
 
 ## Evolution of Decisions
 

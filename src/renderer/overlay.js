@@ -186,13 +186,29 @@ function renderScreenshot() {
     const canvasWidth = gl.canvas.width;
     const canvasHeight = gl.canvas.height;
     
+    // Convert to normalized coordinates (0-1) and flip Y for WebGL texture coordinates
+    // Screen coordinates have origin at top-left, texture coordinates at bottom-left (after Y-flip in shader)
+    const normalizedX = rect.x / canvasWidth;
+    const normalizedY = rect.y / canvasHeight;
+    const normalizedWidth = rect.width / canvasWidth;
+    const normalizedHeight = rect.height / canvasHeight;
+    
+    // Flip Y coordinate: screen Y (top=0) -> texture Y (bottom=0 after flip)
+    // Since we flipped the texture Y in the vertex shader (v_texCoord.y = 1.0 - texCoord.y),
+    // the texture coordinate system now has Y=0 at top, Y=1 at bottom
+    // Screen top (normalizedY=0) should map to texture top (Y=0)
+    // Screen bottom (normalizedY+height) should map to texture bottom (Y=normalizedY+height)
+    // The shader checks: v_texCoord.y >= u_selectionRect.y && v_texCoord.y <= u_selectionRect.y + u_selectionRect.w
+    // So we pass the top coordinate (not bottom) since texture Y is now flipped
+    const textureY = normalizedY;
+    
     gl.uniform1i(uniformLocations.hasSelection, 1);
     gl.uniform4f(
       uniformLocations.selectionRect,
-      rect.x / canvasWidth,
-      rect.y / canvasHeight,
-      rect.width / canvasWidth,
-      rect.height / canvasHeight
+      normalizedX,
+      textureY,
+      normalizedWidth,
+      normalizedHeight
     );
   } else {
     gl.uniform1i(uniformLocations.hasSelection, 0);

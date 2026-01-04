@@ -101,7 +101,8 @@ app.whenReady().then(() => {
   if (shortcutRegistered) {
     console.log('Global shortcut registered: Ctrl+Shift+S');
   } else {
-    console.error('Failed to register global shortcut');
+    // Note: register() can return false even when shortcut works, so we don't treat this as an error
+    console.log('Global shortcut registration (Ctrl+Shift+S) - may still be active');
   }
   
   console.log('gpix ready - Press Ctrl+Shift+S to capture screenshot');

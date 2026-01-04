@@ -10,7 +10,10 @@ Phase 1 screenshot and selection UI fully implemented and functional.
 - WebGL-based overlay with GPU acceleration
 - DPI scaling support with native Electron API
 - ESC cancellation with full resource cleanup
-- All Phase 1 features working
+- **Fixed image flip issue**: Added Y-coordinate flip in vertex shader to account for WebGL texture coordinates (bottom-left origin) vs bitmap data (top-left origin)
+- **Fixed selection rectangle coordinates**: Corrected coordinate mapping to match flipped texture coordinate system
+- **Fixed global shortcut error message**: Changed error message to informational since `register()` can return false even when shortcut works
+- All Phase 1 features working correctly
 
 ## Next Steps
 **Phase 2: Gemini API Integration**
@@ -47,4 +50,7 @@ Phase 1 screenshot and selection UI fully implemented and functional.
 - ESC handler needs capture phase for highest priority
 - Small selections (< 5x5) should be filtered
 - Hidden window required to maintain global shortcut
+- **WebGL coordinate system**: Bitmap data from `toBitmap()` has top-left origin, but WebGL textures use bottom-left origin - must flip Y in vertex shader (`v_texCoord.y = 1.0 - texCoord.y`)
+- **Selection coordinate mapping**: After Y-flip in vertex shader, fragment shader texture coordinates match screen coordinates (top-left origin), so selection rectangles use screen coordinates directly
+- **Global shortcut registration**: `globalShortcut.register()` can return `false` even when the shortcut is actually registered and working - check actual behavior rather than just return value
 

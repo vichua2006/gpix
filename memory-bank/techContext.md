@@ -88,9 +88,15 @@ window.electronAPI.sendSelectionCancelled();
 
 ### WebGL Rendering Pipeline
 1. Create texture from screenshot buffer (once)
-2. Update uniforms during drag (4 floats/frame)
-3. Fragment shader applies dimming/masking
-4. Separate border shader for red rectangle
+2. Upload texture to GPU with Y-coordinate flip in vertex shader (accounts for bitmap top-left vs WebGL bottom-left origin)
+3. Update uniforms during drag (4 floats/frame: x, y, width, height in normalized coordinates)
+4. Fragment shader applies dimming/masking based on selection rectangle
+5. Separate border shader for red rectangle (rendered in clip space, not texture space)
+
+### WebGL Coordinate System
+- **Texture Coordinates**: Flipped in vertex shader to match screen coordinates (top-left origin)
+- **Selection Coordinates**: Use screen coordinates directly (normalized 0-1) since texture coordinates are already flipped
+- **Border Coordinates**: Converted to clip space (-1 to 1) with Y-flip for correct rendering
 
 ### DPI Coordinate Mapping
 ```javascript
