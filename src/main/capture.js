@@ -49,8 +49,18 @@ async function captureScreen() {
   
   console.log(`Screenshot received: ${actualWidth}x${actualHeight}`);
   
-  // Convert to raw RGBA buffer
+  // Convert to raw buffer (BGRA format on Windows)
   const buffer = image.toBitmap();
+  
+  // Convert BGRA to RGBA (swap red and blue channels)
+  // Electron's toBitmap() returns BGRA on Windows, but we need RGBA
+  for (let i = 0; i < buffer.length; i += 4) {
+    const b = buffer[i];     // Blue
+    const r = buffer[i + 2]; // Red
+    buffer[i] = r;           // Red -> position 0
+    buffer[i + 2] = b;       // Blue -> position 2
+    // Green (i+1) and Alpha (i+3) stay in place
+  }
   
   return {
     buffer: buffer,  // Raw RGBA buffer at physical resolution

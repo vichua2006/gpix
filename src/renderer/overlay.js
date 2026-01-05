@@ -31,13 +31,20 @@ let borderUniformLocations = {};
 
 /**
  * Initialize WebGL context and setup
+ * @param {number} physicalWidth - Physical width of screenshot in pixels
+ * @param {number} physicalHeight - Physical height of screenshot in pixels
  */
-function initWebGL() {
+function initWebGL(physicalWidth, physicalHeight) {
   const canvas = document.getElementById('canvas');
   
-  // Set canvas to match window size
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  // Set canvas to match physical screenshot resolution (not logical window size)
+  // This prevents WebGL from having to scale the texture, ensuring pixel-perfect rendering
+  canvas.width = physicalWidth;
+  canvas.height = physicalHeight;
+  
+  // Set CSS size to fill window (maintains aspect ratio)
+  canvas.style.width = window.innerWidth + 'px';
+  canvas.style.height = window.innerHeight + 'px';
   
   // Get WebGL context (try WebGL2 first, fall back to WebGL1)
   gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
@@ -46,7 +53,7 @@ function initWebGL() {
     throw new Error('WebGL not supported');
   }
   
-  console.log('WebGL initialized');
+  console.log(`WebGL initialized: canvas ${physicalWidth}x${physicalHeight}, display ${window.innerWidth}x${window.innerHeight}`);
   
   // Create shader programs
   screenshotProgram = createProgram(gl, VERTEX_SHADER_SOURCE, FRAGMENT_SHADER_SOURCE);
@@ -113,9 +120,9 @@ function uploadScreenshotTexture(buffer, width, height) {
     uint8Array
   );
   
-  // Set texture parameters (no mipmaps, clamp to edge)
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  // Set texture parameters (use NEAREST for pixel-perfect rendering, no blur)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
   
@@ -124,6 +131,7 @@ function uploadScreenshotTexture(buffer, width, height) {
 
 /**
  * Calculates selection rectangle from start and current points
+ * Returns integer pixel coordinates (rounds to nearest pixel)
  */
 function calculateRect(x1, y1, x2, y2) {
   const left = Math.min(x1, x2);
@@ -131,18 +139,12 @@ function calculateRect(x1, y1, x2, y2) {
   const width = Math.abs(x2 - x1);
   const height = Math.abs(y2 - y1);
   
-  return { x: left, y: top, width, height };
-}
-
-/**
- * Converts logical coordinates to physical coordinates using scale factor
- */
-function mapLogicalToPhysical(logicalRect) {
-  return {
-    x: Math.round(logicalRect.x * scaleFactor),
-    y: Math.round(logicalRect.y * scaleFactor),
-    width: Math.round(logicalRect.width * scaleFactor),
-    height: Math.round(logicalRect.height * scaleFactor)
+  // Round to integer pixels for buffer extraction
+  return { 
+    x: Math.round(left), 
+    y: Math.round(top), 
+    width: Math.round(width), 
+    height: Math.round(height) 
   };
 }
 
@@ -323,6 +325,20 @@ function cleanup() {
 }
 
 /**
+ * Converts mouse event coordinates (CSS pixels) to canvas coordinates (physical pixels)
+ */
+function getCanvasCoordinates(mouseX, mouseY) {
+  const canvas = document.getElementById('canvas');
+  const rect = canvas.getBoundingClientRect();
+  
+  // Convert CSS coordinates to canvas coordinates
+  const canvasX = (mouseX - rect.left) * (canvas.width / rect.width);
+  const canvasY = (mouseY - rect.top) * (canvas.height / rect.height);
+  
+  return { x: canvasX, y: canvasY };
+}
+
+/**
  * Mouse event handlers
  */
 function setupInputHandlers() {
@@ -330,8 +346,9 @@ function setupInputHandlers() {
   
   // Mouse down - start selection
   canvas.addEventListener('mousedown', (e) => {
-    startX = currentX = e.clientX;
-    startY = currentY = e.clientY;
+    const coords = getCanvasCoordinates(e.clientX, e.clientY);
+    startX = currentX = coords.x;
+    startY = currentY = coords.y;
     selecting = true;
     console.log(`Selection started at (${startX}, ${startY})`);
   });
@@ -339,8 +356,9 @@ function setupInputHandlers() {
   // Mouse move - update selection
   canvas.addEventListener('mousemove', (e) => {
     if (selecting) {
-      currentX = e.clientX;
-      currentY = e.clientY;
+      const coords = getCanvasCoordinates(e.clientX, e.clientY);
+      currentX = coords.x;
+      currentY = coords.y;
     }
   });
   
@@ -350,22 +368,18 @@ function setupInputHandlers() {
     
     selecting = false;
     
-    // Calculate final rectangle in logical coordinates
-    const logicalRect = calculateRect(startX, startY, currentX, currentY);
+    // Calculate final rectangle (already in physical coordinates)
+    const physicalRect = calculateRect(startX, startY, currentX, currentY);
     
     // Skip if selection is too small (likely accidental click)
-    if (logicalRect.width < 5 || logicalRect.height < 5) {
+    if (physicalRect.width < 5 || physicalRect.height < 5) {
       console.log('Selection too small, ignoring');
       return;
     }
     
-    // Convert to physical coordinates
-    const physicalRect = mapLogicalToPhysical(logicalRect);
-    
-    console.log('Selection complete (logical):', logicalRect);
     console.log('Selection complete (physical):', physicalRect);
     
-    // Send to main process
+    // Send to main process (coordinates are already physical, no conversion needed)
     window.electronAPI.sendSelectionComplete(physicalRect);
   });
   
@@ -399,8 +413,8 @@ window.electronAPI.onScreenshotData(async (data) => {
   scaleFactor = data.scaleFactor;
   
   try {
-    // Initialize WebGL
-    initWebGL();
+    // Initialize WebGL with physical screenshot dimensions
+    initWebGL(data.width, data.height);
     
     // Upload screenshot texture (one-time)
     uploadScreenshotTexture(data.buffer, data.width, data.height);
