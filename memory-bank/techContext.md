@@ -29,7 +29,7 @@ gpix/
 │   │   ├── overlay-manager.js   # Overlay window lifecycle
 │   │   ├── preload.js           # IPC bridge
 │   │   ├── region-extractor.js  # Crop selected region
-│   │   ├── image-converter.js   # RGBA buffer to PNG base64 conversion
+│   │   ├── image-converter.js   # RGBA buffer to PNG base64 conversion (with resizing & compression)
 │   │   ├── gemini-client.js     # Gemini API client and response parsing
 │   │   └── clipboard-handler.js # Clipboard operations
 │   └── renderer/
@@ -81,7 +81,8 @@ gpix/
 
 ### API Integration
 - **Gemini API**: REST API (v1 endpoint)
-- **Model**: gemini-2.5-flash (default), alternatives: gemini-2.5-pro, gemini-2.5-flash-lite
+- **Model**: gemini-2.5-flash-lite (default - optimized for speed), alternatives: gemini-2.5-flash (balanced), gemini-2.5-pro (best accuracy, slower)
+- **Generation Config**: `maxOutputTokens: 256`, `temperature: 0.1` (optimized for fast, deterministic LaTeX output)
 - **HTTP Client**: Native fetch (Node.js 18+, Electron 28 uses Node 20)
 
 ## Tool Usage Patterns
@@ -132,7 +133,9 @@ physicalX = Math.round(logicalX * scaleFactor);
 ### Configuration (Phase 2)
 - **API Key**: Stored in `.env` file as `GEMINI_API_KEY` (loaded via dotenv)
 - **API Version**: v1 (stable)
-- **Model**: gemini-2.5-flash (can be changed in gemini-client.js)
+- **Model**: gemini-2.5-flash-lite (can be changed in gemini-client.js)
+- **Generation Config**: maxOutputTokens: 256, temperature: 0.1 (optimized for speed)
+- **Image Optimization**: Auto-resize to max 1024px (longest side), PNG compression level 6
 - **Prompt**: Stored as constant in gemini-client.js
 - **Result Delivery**: Clipboard (automatic copy)
 

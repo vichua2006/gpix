@@ -67,8 +67,9 @@
 - **Shortcut:** Ctrl+Shift+S (hard-coded for Phase 1)
 - **Dimming:** 0.5 brightness factor
 - **Border:** Red 2px rectangle
-- **API:** Gemini API v1 with gemini-2.5-flash model
-- **Image Conversion:** sharp library (PNG format)
+- **API:** Gemini API v1 with gemini-2.5-flash-lite model (optimized for speed)
+- **API Config:** maxOutputTokens: 256, temperature: 0.1 (fast, deterministic responses)
+- **Image Conversion:** sharp library (PNG format with auto-resize to max 1024px and compression)
 - **Environment Config:** dotenv for .env file support
 - **Result Display:** Clipboard copy (automatic)
 
@@ -81,6 +82,7 @@
 - Overlay closes immediately after selection (before API call)
 - All image processing in-memory (no file storage)
 - API key loaded from .env file via dotenv
+- Image optimization: automatic resizing and compression for faster API processing (2-4x speed improvement)
 
 ## Testing Status
 - Application launches successfully

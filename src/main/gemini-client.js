@@ -6,11 +6,11 @@ const PROMPT = "Extract the mathematical equation from this image and convert it
 
 const API_BASE_URL = 'https://generativelanguage.googleapis.com/v1';
 // Recommended models for image-to-LaTeX conversion (in order of preference):
-// 1. gemini-2.5-flash - Balanced performance and efficiency, ideal for production
-// 2. gemini-2.5-pro - Best for complex tasks, coding, and STEM applications  
-// 3. gemini-2.5-flash-lite - Optimized for high-volume, cost-sensitive scenarios
+// 1. gemini-2.5-flash-lite - FASTEST, optimized for speed and cost (DEFAULT)
+// 2. gemini-2.5-flash - Balanced performance and efficiency
+// 3. gemini-2.5-pro - Best for complex tasks, coding, and STEM applications (slower)
 // If the default doesn't work, try changing MODEL to one of the alternatives above
-const MODEL = 'gemini-2.5-flash';
+const MODEL = 'gemini-2.5-flash-lite';
 
 /**
  * Sends an image to Gemini API and returns the response
@@ -42,7 +42,11 @@ async function sendImageToGemini(base64Image, prompt = PROMPT) {
           }
         }
       ]
-    }]
+    }],
+    generationConfig: {
+      maxOutputTokens: 256, // Limit response length for faster generation (LaTeX equations are typically short)
+      temperature: 0.1 // Lower temperature for more deterministic, faster responses
+    }
   };
   
   try {
