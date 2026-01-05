@@ -129,17 +129,21 @@
 ## Critical Implementation Paths
 
 ### Screenshot to Overlay Path
-1. `desktopCapturer.getSources()` or screenshot library
-2. Convert to image buffer/base64
-3. Pass to overlay renderer process
-4. Render in overlay window
+1. `desktopCapturer.getSources()` captures at physical resolution
+2. `thumbnail.toBitmap()` returns BGRA buffer
+3. Convert BGRA to RGBA (swap red/blue channels)
+4. Pass RGBA buffer to overlay renderer process
+5. Set canvas internal resolution to match screenshot physical resolution
+6. Upload texture to GPU with `gl.NEAREST` filtering
+7. Render in overlay window at 1:1 pixel ratio (no scaling)
 
 ### Selection to Extraction Path
-1. Mouse events capture coordinates
-2. Calculate normalized rectangle bounds
-3. Map to original screenshot coordinates
-4. Crop image using bounds
-5. Return cropped image data
+1. Mouse events capture coordinates (CSS pixels)
+2. Convert CSS pixels to canvas pixels (physical coordinates)
+3. Calculate rectangle bounds and round to integer pixels
+4. Coordinates are already in physical pixels (match buffer dimensions)
+5. Crop RGBA buffer using integer pixel bounds
+6. Return cropped RGBA image data for PNG conversion
 
 ## Future Integration Points (Phase 2)
 - Region extractor will pass data to API client

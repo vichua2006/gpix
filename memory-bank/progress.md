@@ -18,16 +18,19 @@
 
 **Application Status:** Running and functional
 
-## What's Left to Build
+### Phase 2: API Integration ✓ COMPLETE
+- [x] Gemini API client setup
+- [x] Image encoding/preparation (base64 PNG)
+- [x] Prompt template for equation extraction
+- [x] API request with error handling
+- [x] Response parsing
+- [x] LaTeX result display (clipboard)
+- [x] Environment variable configuration (dotenv)
+- [x] Overlay window closes immediately after selection
 
-### Phase 2: API Integration (Next)
-- [ ] Gemini API client setup
-- [ ] Image encoding/preparation (base64 or multipart)
-- [ ] Prompt template for equation extraction
-- [ ] API request with error handling
-- [ ] Response parsing
-- [ ] LaTeX result display UI
-- [ ] Rate limiting and retry logic
+**Application Status:** Fully functional with API integration
+
+## What's Left to Build
 
 ### Future Enhancements
 - [ ] Multi-monitor support
@@ -37,15 +40,23 @@
 - [ ] Tray icon integration
 
 ## Current Status
-**Status:** Phase 1 Complete, Ready for Phase 2
-**Phase:** Transitioning to API Integration
-**Next Milestone:** Gemini API integration for LaTeX conversion
+**Status:** Phase 2 Complete - Full application functional
+**Phase:** Complete - Ready for enhancements/optimization
+**Next Milestone:** User testing and potential enhancements (multi-monitor, config UI, etc.)
 
 ## Known Issues
-- None - all Phase 1 features working correctly
-- Previously fixed: Image flip (180° rotation) - resolved by Y-coordinate flip in vertex shader
-- Previously fixed: Selection rectangle vertical inversion - resolved by using screen coordinates directly (texture coordinates already flipped)
-- Previously fixed: Global shortcut error message - resolved by changing to informational message
+- None - all features working correctly
+
+## Previously Fixed Issues
+- **Image flip (180° rotation)**: Resolved by Y-coordinate flip in vertex shader
+- **Selection rectangle vertical inversion**: Resolved by using screen coordinates directly (texture coordinates already flipped)
+- **Global shortcut error message**: Resolved by changing to informational message
+- **Color hue distortion (red/blue swap)**: Resolved by adding BGRA to RGBA conversion in capture.js (Electron's `toBitmap()` returns BGRA on Windows)
+- **Image blurriness**: Resolved by:
+  - Setting canvas internal resolution to match physical screenshot resolution
+  - Converting mouse coordinates from CSS pixels to canvas pixels
+  - Using `gl.NEAREST` texture filtering instead of `gl.LINEAR`
+  - Rounding coordinates to integer pixel values for buffer extraction
 
 ## Evolution of Decisions
 
@@ -56,13 +67,20 @@
 - **Shortcut:** Ctrl+Shift+S (hard-coded for Phase 1)
 - **Dimming:** 0.5 brightness factor
 - **Border:** Red 2px rectangle
+- **API:** Gemini API v1 with gemini-2.5-flash model
+- **Image Conversion:** sharp library (PNG format)
+- **Environment Config:** dotenv for .env file support
+- **Result Display:** Clipboard copy (automatic)
 
 ### Implementation Details
 - WebGL texture uploaded once per capture
 - Uniforms updated during drag (4 floats/frame)
 - Physical resolution capture, logical coordinate overlay
-- State machine: idle → capturing → selecting → idle
+- State machine: idle → capturing → selecting → processing → idle
 - Cleanup on ESC and completion
+- Overlay closes immediately after selection (before API call)
+- All image processing in-memory (no file storage)
+- API key loaded from .env file via dotenv
 
 ## Testing Status
 - Application launches successfully
@@ -71,8 +89,8 @@
 - Ready for user acceptance testing
 
 ## Notes
-- Zero dependencies beyond Electron
-- ~1000 lines of code
-- Modular structure for Phase 2 integration
-- Production-ready for Phase 1 scope
+- Dependencies: electron, sharp, dotenv
+- Modular structure with separate modules for API, image conversion, clipboard
+- Production-ready for core functionality
+- Requires GEMINI_API_KEY in .env file
 
