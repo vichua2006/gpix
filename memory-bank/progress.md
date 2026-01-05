@@ -40,9 +40,10 @@
 - [ ] Tray icon integration
 
 ## Current Status
-**Status:** Phase 2 Complete - Full application functional
-**Phase:** Complete - Ready for enhancements/optimization
-**Next Milestone:** User testing and potential enhancements (multi-monitor, config UI, etc.)
+**Status:** Phase 2 Complete - Full application functional with build configuration
+**Phase:** Complete - Ready for distribution and enhancements
+**Next Milestone:** Distribution and potential enhancements (multi-monitor, config UI, etc.)
+**Build Status:** electron-builder configured, portable executable builds successfully
 
 ## Known Issues
 - None - all features working correctly
@@ -91,8 +92,10 @@
 - Ready for user acceptance testing
 
 ## Notes
-- Dependencies: electron, sharp, dotenv
+- Dependencies: electron (dev), sharp, dotenv, electron-builder (dev)
 - Modular structure with separate modules for API, image conversion, clipboard
 - Production-ready for core functionality
 - Requires GEMINI_API_KEY in .env file
+- Build: Run `npm run build` to create portable executable in `dist/` directory
+- Build format: Portable `.exe` (no installer, no code signing required)
 

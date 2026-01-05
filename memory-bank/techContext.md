@@ -47,8 +47,11 @@ gpix/
 {
   "dependencies": {
     "dotenv": "^16.3.1",
-    "electron": "^28.0.0",
     "sharp": "^0.33.0"
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
   }
 }
 ```
@@ -75,14 +78,17 @@ gpix/
 ## Dependencies
 
 ### Production
-- **electron**: ^28.0.0 - Desktop application framework
 - **sharp**: ^0.33.0 - Image processing (RGBA to PNG conversion)
 - **dotenv**: ^16.3.1 - Environment variable management (.env file support)
+
+### Development
+- **electron**: ^28.0.0 - Desktop application framework (dev dependency)
+- **electron-builder**: ^24.9.1 - Build and packaging tool (dev dependency)
 
 ### API Integration
 - **Gemini API**: REST API (v1 endpoint)
 - **Model**: gemini-2.5-flash-lite (default - optimized for speed), alternatives: gemini-2.5-flash (balanced), gemini-2.5-pro (best accuracy, slower)
-- **Generation Config**: `maxOutputTokens: 256`, `temperature: 0.1` (optimized for fast, deterministic LaTeX output)
+- **Generation Config**: `maxOutputTokens: 2048`, `temperature: 0.1` (increased token limit for longer LaTeX outputs, deterministic responses)
 - **HTTP Client**: Native fetch (Node.js 18+, Electron 28 uses Node 20)
 
 ## Tool Usage Patterns
@@ -145,9 +151,16 @@ physicalX = Math.round(logicalX * scaleFactor);
 - Visual feedback during processing
 
 ## Build & Distribution
-- Standard Electron build process
-- Electron Builder or Electron Forge (to be decided)
-- Windows installer/portable (primary target)
+- **Build Tool:** electron-builder v24.9.1
+- **Windows Target:** Portable executable (`.exe` file, no installer)
+- **Code Signing:** Disabled (avoids Windows symlink permission issues)
+- **Build Command:** `npm run build` (or `npm run build:win` for Windows only)
+- **Output Directory:** `dist/` folder
+- **Build Configuration:** 
+  - Portable format for Windows (avoids NSIS installer code signing requirements)
+  - Code signing explicitly disabled (`sign: null`, `signDlls: false`)
+  - Icon support (requires `build/icon.png` for Windows, optional)
+- **Known Issue:** Windows requires Developer Mode or admin privileges for code signing tool extraction (resolved by using portable format and disabling signing)
 
 ## Environment Requirements
 - Node.js 18+ required (for native fetch API)

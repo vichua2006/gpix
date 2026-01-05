@@ -5,7 +5,12 @@
   "main": "src/main/main.js",
   "scripts": {
     "start": "electron .",
-    "dev": "electron . --dev"
+    "dev": "electron . --dev",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux",
+    "clean-cache": "rm -rf \"$LOCALAPPDATA/electron-builder/Cache/winCodeSign\" 2>/dev/null || rm -rf /c/Users/$USER/AppData/Local/electron-builder/Cache/winCodeSign 2>/dev/null || echo Cache cleaned"
   },
   "keywords": [
     "screenshot",
@@ -17,8 +22,63 @@
   "license": "MIT",
   "dependencies": {
     "dotenv": "^16.3.1",
-    "electron": "^28.0.0",
     "sharp": "^0.33.0"
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "com.gpix.app",
+    "productName": "gpix",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*",
+      "package.json",
+      "node_modules/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.png",
+      "sign": null,
+      "signDlls": false
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "icon": "build/icon.icns"
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
   }
 }
 

@@ -6,11 +6,18 @@
 Phase 1 and Phase 2 fully implemented. Application captures screenshots, allows region selection, converts equations to LaTeX via Gemini API, and copies result to clipboard.
 
 ## Recent Changes
+- **Build Configuration**: Added electron-builder for packaging and distribution
+  - **Build target**: Portable executable for Windows (avoids code signing requirements)
+  - **Code signing**: Disabled (`sign: null`, `signDlls: false`) to avoid Windows symlink permission issues
+  - **Build scripts**: Added `build`, `build:win`, `build:mac`, `build:linux`, and `clean-cache` scripts
+  - **Output**: Builds to `dist/` directory as portable `.exe` file
+- **API Token Limit**: Increased `maxOutputTokens` from 256 to 2048 for longer LaTeX outputs
+- **Cursor**: Changed from crosshair to pointer cursor for better visibility
 - **Performance Optimizations**: Speed improvements for Gemini API requests (2-4x faster)
   - **Model switch**: Changed from `gemini-2.5-flash` to `gemini-2.5-flash-lite` (optimized for speed)
   - **Image resizing**: Automatically resizes images to max 1024px on longest side (maintains aspect ratio, reduces payload size by 50-80%)
   - **PNG compression**: Added compression level 6 for optimized file sizes
-  - **API generation config**: Added `maxOutputTokens: 256` and `temperature: 0.1` for faster, more deterministic responses
+  - **API generation config**: `maxOutputTokens: 2048` and `temperature: 0.1` for faster, more deterministic responses
 - **Critical Bug Fixes**: Fixed color accuracy and image sharpness issues
   - **BGRA to RGBA conversion**: Added color channel swap in capture.js to fix red/blue channel inversion (Electron's `toBitmap()` returns BGRA on Windows, not RGBA)
   - **Canvas resolution fix**: Set canvas internal resolution to match physical screenshot resolution instead of logical window size (prevents forced scaling/blur)
@@ -71,6 +78,12 @@ Phase 1 and Phase 2 fully implemented. Application captures screenshots, allows 
 ### Environment Configuration
 - **Chosen:** dotenv package with .env file
 - **Reason:** Standard approach, keeps API key out of code, easy to configure
+
+### Build & Distribution
+- **Chosen:** electron-builder with portable format for Windows
+- **Reason:** Portable format avoids code signing requirements and Windows symlink permission issues
+- **Configuration:** Code signing disabled, outputs standalone executable to `dist/` directory
+- **Build command:** `npm run build` creates portable `.exe` file
 
 ## Important Patterns & Preferences
 - Modular structure: capture, overlay, extraction, API, image conversion, clipboard separated
