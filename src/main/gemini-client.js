@@ -101,7 +101,7 @@ async function sendImageToGemini(base64Image, prompt = PROMPT) {
       ]
     }],
     generationConfig: {
-      maxOutputTokens: 256, // Limit response length for faster generation (LaTeX equations are typically short)
+      maxOutputTokens: 2048, // Increased limit for longer LaTeX outputs
       temperature: 0.1 // Lower temperature for more deterministic, faster responses
     }
   };
