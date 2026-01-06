@@ -38,6 +38,7 @@ gpix/
 │       └── shaders.js           # GLSL shader programs
 ├── package.json
 ├── .env                         # Environment variables (GEMINI_API_KEY)
+├── run-gpix.sh                  # Shell script for running app with process management
 ├── README.md
 └── TESTING.md
 ```
@@ -92,6 +93,18 @@ gpix/
 - **HTTP Client**: Native fetch (Node.js 18+, Electron 28 uses Node 20)
 
 ## Tool Usage Patterns
+
+### Shell Script for Process Management
+- **File**: `run-gpix.sh`
+- **Purpose**: Run the built executable with proper process management
+- **Features**:
+  - Captures process ID (PID) for tracking
+  - Handles Ctrl+C (SIGINT) and SIGTERM signals
+  - Automatic cleanup on exit
+  - Prevents multiple instances (checks for existing PID)
+  - Graceful shutdown with fallback to force kill
+- **Usage**: `./run-gpix.sh` (requires executable permissions: `chmod +x run-gpix.sh`)
+- **Solves**: Issue where app couldn't be stopped once running (app runs in background with global shortcuts)
 
 ### Electron IPC (Implemented)
 ```javascript
@@ -161,6 +174,7 @@ physicalX = Math.round(logicalX * scaleFactor);
   - Code signing explicitly disabled (`sign: null`, `signDlls: false`)
   - Icon support (requires `build/icon.png` for Windows, optional)
 - **Known Issue:** Windows requires Developer Mode or admin privileges for code signing tool extraction (resolved by using portable format and disabling signing)
+- **Running the App:** Use `./run-gpix.sh` shell script for proper process management (allows stopping with Ctrl+C)
 
 ## Environment Requirements
 - Node.js 18+ required (for native fetch API)

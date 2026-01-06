@@ -30,6 +30,15 @@
 
 **Application Status:** Fully functional with API integration
 
+### Operational Tooling ✓ COMPLETE
+- [x] Shell script for running and stopping the app (`run-gpix.sh`)
+  - Process management with PID tracking
+  - Ctrl+C signal handling for graceful shutdown
+  - Prevents multiple instances
+  - Automatic cleanup on exit
+
+**Application Status:** Fully functional with operational tooling
+
 ## What's Left to Build
 
 ### Future Enhancements

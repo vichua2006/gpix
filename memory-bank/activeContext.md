@@ -6,6 +6,11 @@
 Phase 1 and Phase 2 fully implemented. Application captures screenshots, allows region selection, converts equations to LaTeX via Gemini API, and copies result to clipboard.
 
 ## Recent Changes
+- **Shell Script for Process Management**: Created `run-gpix.sh` to solve app stopping issue
+  - **Purpose**: Allows stopping the app with Ctrl+C (solves issue where app couldn't be stopped once running)
+  - **Features**: Process ID tracking, signal handling (SIGINT/SIGTERM), automatic cleanup, prevents multiple instances
+  - **Usage**: Run `./run-gpix.sh` to start the app, press Ctrl+C to stop
+  - **PID Management**: Saves process ID to `.gpix.pid` file for tracking and cleanup
 - **Build Configuration**: Added electron-builder for packaging and distribution
   - **Build target**: Portable executable for Windows (avoids code signing requirements)
   - **Code signing**: Disabled (`sign: null`, `signDlls: false`) to avoid Windows symlink permission issues
