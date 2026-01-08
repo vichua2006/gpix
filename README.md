@@ -4,6 +4,15 @@ why pay 6 dollars a month for Mathpix when you can use a Gemini wrapper? 😋
 
 GPU-accelerated screenshot capture with interactive region selection for equation-to-LaTeX conversion.
 
+$$
+\begin{align}
+G_t^t &= -\frac{h'}{rh^2} - \frac{1}{r^2}\left(1 - \frac{1}{h}\right), \quad &(49) \notag\\
+G_r^r &= \frac{f'}{rfh} - \frac{1}{r^2}\left(1 - \frac{1}{h}\right), \quad &(50) \notag\\
+G_\theta^\theta = G_\varphi^\varphi &= \frac{1}{2\sqrt{fh}}\frac{d}{dr}\left(\frac{f'}{\sqrt{fh}}\right) + \frac{f'}{2rfh} - \frac{h'}{2rh^2}, \quad &(51) \notag\\
+\end{align}
+$$
+
+
 ## Features
 
 - **Global Keyboard Shortcut**: `Ctrl+Shift+S` (Windows/Linux) or `Cmd+Shift+S` (macOS)
