@@ -6,6 +6,7 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 EXE_PATH="$SCRIPT_DIR/dist/gpix 1.0.0.exe"
 PID_FILE="$SCRIPT_DIR/.gpix.pid"
+ENV_FILE="$SCRIPT_DIR/.env"
 
 # Function to cleanup on exit
 cleanup() {
@@ -60,8 +61,18 @@ fi
 echo "Starting gpix 1.0.0..."
 echo "Press Ctrl+C to stop"
 
-# Run the executable in background and capture PID
-"$EXE_PATH" &
+# Load environment variables from .env in app folder (if present)
+if [ -f "$ENV_FILE" ]; then
+    set -a
+    # shellcheck disable=SC1090
+    . "$ENV_FILE"
+    set +a
+else
+    echo "Warning: .env not found at $ENV_FILE"
+fi
+
+# Run the executable from the app folder and capture PID
+(cd "$SCRIPT_DIR" && "$EXE_PATH") &
 APP_PID=$!
 
 # Save PID to file
