@@ -1,11 +1,22 @@
 # Active Context
 
 ## Current Work Focus
-**Installer + Main UI integration**
+**Settings UI polish complete**
 
-Converted the app to a single main UI window (React-based) with keychain API key storage and tray/menu access. Packaging switched to NSIS for Windows and DMG for macOS.
+Main UI window (React-based) with keychain API key storage, tray/menu access, API key validation, and visibility toggle. Packaging configured for NSIS (Windows) and DMG (macOS).
 
 ## Recent Changes
+- **API Key Validation**: Added connectivity test that validates API key against gemini-2.5-flash-lite model
+  - Tests automatically on startup if API key exists
+  - Manual "Test key" button for on-demand testing
+  - Status indicator shows: "Checking...", "✓ Valid", or "✗ Invalid"
+  - Detailed error messages for invalid keys (format, auth, model access)
+- **Eye Icon Toggle**: Added visibility toggle for API key input field
+  - Click eye icon to show/hide API key
+  - Uses SVG icons (eye open/eye with slash)
+  - Positioned inside the input field on the right
+- **Settings UI cleanup**: Removed card container styling - UI components now sit directly in window without floating rounded box
+- **Shortcut description**: Added global shortcut info (Ctrl+Shift+S) to settings page with styled keyboard keys
 - **Main UI window**: Settings UI is now the primary app window (no separate settings window)
 - **Key storage**: API key stored in OS keychain via keytar, `.env` used only as dev fallback
 - **UI framework**: Lightweight React UI with neutral styling

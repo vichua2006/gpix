@@ -45,6 +45,10 @@
 - [x] Main UI window (React) for API key management
 - [x] Keychain storage via keytar (with .env dev fallback)
 - [x] Tray/menu actions for Open/Quit
+- [x] Simplified settings UI (removed card container, direct window layout)
+- [x] Global shortcut description with styled kbd elements
+- [x] API key connectivity test (on startup + manual "Test key" button)
+- [x] Eye icon toggle for API key visibility
 
 ## What's Left to Build
 

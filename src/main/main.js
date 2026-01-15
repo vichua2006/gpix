@@ -242,6 +242,55 @@ ipcMain.on('settings-quit-app', () => {
   app.quit();
 });
 
+// Test API key validity by checking if we can access the model
+ipcMain.handle('settings-test-key', async (event, apiKey) => {
+  if (!apiKey || typeof apiKey !== 'string' || !apiKey.trim()) {
+    return { success: false, error: 'No API key provided' };
+  }
+
+  const MODEL = 'gemini-2.5-flash-lite';
+  const url = `https://generativelanguage.googleapis.com/v1/models/${MODEL}?key=${apiKey.trim()}`;
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    if (response.ok) {
+      return { success: true };
+    }
+
+    // Parse error response
+    const errorText = await response.text();
+    let errorMessage = `API error (${response.status})`;
+
+    try {
+      const errorJson = JSON.parse(errorText);
+      if (errorJson.error && errorJson.error.message) {
+        errorMessage = errorJson.error.message;
+      }
+    } catch (e) {
+      // Use raw text if JSON parsing fails
+    }
+
+    if (response.status === 400) {
+      return { success: false, error: 'Invalid API key format' };
+    } else if (response.status === 401 || response.status === 403) {
+      return { success: false, error: 'Invalid or unauthorized API key' };
+    } else if (response.status === 404) {
+      return { success: false, error: 'Model not available for this API key' };
+    } else {
+      return { success: false, error: errorMessage };
+    }
+  } catch (error) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      return { success: false, error: 'Network error - check your connection' };
+    }
+    return { success: false, error: error.message || 'Connection test failed' };
+  }
+});
+
 app.whenReady().then(async () => {
   createMainWindow();
   createTray();
