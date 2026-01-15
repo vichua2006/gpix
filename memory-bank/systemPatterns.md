@@ -63,6 +63,11 @@
    - Formats image for next phase (API integration)
    - Currently just returns image data
 
+6. **Main UI Window**
+  - React-based UI for API key management
+  - Runs as the primary app window (no separate settings window)
+  - Tray/menu opens and focuses this window
+
 ### Renderer Process (Overlay Window)
 - Lightweight renderer for overlay display
 - Receives screenshot data via IPC or direct assignment
@@ -117,6 +122,7 @@
 - Global shortcut triggers workflow
 - Mouse events drive selection state
 - IPC for main/renderer communication
+- Tray/menu actions open the main UI window
 
 ### Single Responsibility
 - Each module handles one concern

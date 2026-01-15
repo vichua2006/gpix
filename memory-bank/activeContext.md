@@ -1,11 +1,17 @@
 # Active Context
 
 ## Current Work Focus
-**Phase 2: Complete ✓ - Full Application Functional**
+**Installer + Main UI integration**
 
-Phase 1 and Phase 2 fully implemented. Application captures screenshots, allows region selection, converts equations to LaTeX via Gemini API, and copies result to clipboard.
+Converted the app to a single main UI window (React-based) with keychain API key storage and tray/menu access. Packaging switched to NSIS for Windows and DMG for macOS.
 
 ## Recent Changes
+- **Main UI window**: Settings UI is now the primary app window (no separate settings window)
+- **Key storage**: API key stored in OS keychain via keytar, `.env` used only as dev fallback
+- **UI framework**: Lightweight React UI with neutral styling
+- **Tray/menu**: Tray icon with Open/Quit and app menu entry
+- **Build target**: Windows NSIS installer and macOS DMG
+- **Dev tooling**: DevTools auto-open in dev builds
 - **Shell Script for Process Management**: Created `run-gpix.sh` to solve app stopping issue
   - **Purpose**: Allows stopping the app with Ctrl+C (solves issue where app couldn't be stopped once running)
   - **Features**: Process ID tracking, signal handling (SIGINT/SIGTERM), automatic cleanup, prevents multiple instances
@@ -42,13 +48,10 @@ Phase 1 and Phase 2 fully implemented. Application captures screenshots, allows 
 - Comprehensive error handling for API failures, network issues, missing keys
 
 ## Next Steps
-**Future Enhancements (Optional)**
-1. Multi-monitor support
-2. Configuration UI for API key and shortcuts
-3. Visual feedback during API processing (loading indicator)
-4. Retry logic for failed API requests
-5. Save cropped images to file (optional)
-6. Tray icon integration
+**Follow-ups**
+1. Revisit security: re-enable contextIsolation and remove nodeIntegration for main UI
+2. Add app icons (tray/app) for dev and build assets
+3. Optional: add shortcut customization UI
 
 ## Key Decisions Made
 

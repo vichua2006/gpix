@@ -39,23 +39,29 @@
 
 **Application Status:** Fully functional with operational tooling
 
+### Distribution & UI ✓ IN PROGRESS
+- [x] Windows NSIS installer target
+- [x] macOS DMG target
+- [x] Main UI window (React) for API key management
+- [x] Keychain storage via keytar (with .env dev fallback)
+- [x] Tray/menu actions for Open/Quit
+
 ## What's Left to Build
 
 ### Future Enhancements
 - [ ] Multi-monitor support
 - [ ] Customizable shortcuts
 - [ ] Save cropped images to file
-- [ ] Configuration UI
-- [ ] Tray icon integration
+- [ ] Configuration UI (advanced settings)
 
 ## Current Status
-**Status:** Phase 2 Complete - Full application functional with build configuration
-**Phase:** Complete - Ready for distribution and enhancements
-**Next Milestone:** Distribution and potential enhancements (multi-monitor, config UI, etc.)
-**Build Status:** electron-builder configured, portable executable builds successfully
+**Status:** Core functionality complete with UI + keychain storage
+**Phase:** Distribution UI integration in progress
+**Next Milestone:** Harden main UI security (remove nodeIntegration), add icons, validate installer on macOS
+**Build Status:** electron-builder configured, NSIS/DMG targets working on Windows
 
 ## Known Issues
-- None - all features working correctly
+- Main UI currently uses `nodeIntegration: true` to load React in dev; should be replaced with preload + bundling for production security
 
 ## Previously Fixed Issues
 - **Image flip (180° rotation)**: Resolved by Y-coordinate flip in vertex shader

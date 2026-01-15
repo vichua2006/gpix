@@ -48,6 +48,9 @@ gpix/
 {
   "dependencies": {
     "dotenv": "^16.3.1",
+    "keytar": "^7.9.0",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
     "sharp": "^0.33.0"
   },
   "devDependencies": {
@@ -150,7 +153,7 @@ physicalX = Math.round(logicalX * scaleFactor);
 - Min selection: 5x5 pixels
 
 ### Configuration (Phase 2)
-- **API Key**: Stored in `.env` file as `GEMINI_API_KEY` (loaded via dotenv)
+- **API Key**: Stored in OS keychain via keytar; `.env` used as dev fallback only
 - **API Version**: v1 (stable)
 - **Model**: gemini-2.5-flash-lite (can be changed in gemini-client.js)
 - **Generation Config**: maxOutputTokens: 256, temperature: 0.1 (optimized for speed)
@@ -165,12 +168,12 @@ physicalX = Math.round(logicalX * scaleFactor);
 
 ## Build & Distribution
 - **Build Tool:** electron-builder v24.9.1
-- **Windows Target:** Portable executable (`.exe` file, no installer)
+- **Windows Target:** NSIS installer (`.exe`)
 - **Code Signing:** Disabled (avoids Windows symlink permission issues)
 - **Build Command:** `npm run build` (or `npm run build:win` for Windows only)
 - **Output Directory:** `dist/` folder
 - **Build Configuration:** 
-  - Portable format for Windows (avoids NSIS installer code signing requirements)
+  - NSIS for Windows, DMG for macOS
   - Code signing explicitly disabled (`sign: null`, `signDlls: false`)
   - Icon support (requires `build/icon.png` for Windows, optional)
 - **Known Issue:** Windows requires Developer Mode or admin privileges for code signing tool extraction (resolved by using portable format and disabling signing)

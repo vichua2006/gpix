@@ -2,6 +2,8 @@
  * Gemini API client for equation-to-LaTeX conversion
  */
 
+const { getApiKey } = require('./secure-store');
+
 const PROMPT = `
 Gemini Prompt — Math OCR → Minimal LaTeX Formatting
 
@@ -76,7 +78,7 @@ const MODEL = 'gemini-2.5-flash-lite';
  * @returns {Promise<Object>} API response object
  */
 async function sendImageToGemini(base64Image, prompt = PROMPT) {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = await getApiKey();
   
   if (!apiKey) {
     throw new Error('GEMINI_API_KEY environment variable is not set');

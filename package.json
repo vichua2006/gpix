@@ -22,6 +22,9 @@
   "license": "MIT",
   "dependencies": {
     "dotenv": "^16.3.1",
+    "keytar": "^7.9.0",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
     "sharp": "^0.33.0"
   },
   "devDependencies": {
@@ -42,13 +45,12 @@
     "win": {
       "target": [
         {
-          "target": "portable",
+          "target": "nsis",
           "arch": [
             "x64"
           ]
         }
       ],
-      "icon": "build/icon.png",
       "sign": null,
       "signDlls": false
     },
@@ -61,8 +63,7 @@
             "arm64"
           ]
         }
-      ],
-      "icon": "build/icon.icns"
+      ]
     },
     "linux": {
       "target": [
@@ -72,8 +73,7 @@
             "x64"
           ]
         }
-      ],
-      "icon": "build/icon.png"
+      ]
     },
     "nsis": {
       "oneClick": false,
@@ -81,4 +81,3 @@
     }
   }
 }
-

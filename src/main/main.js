@@ -1,7 +1,7 @@
 // Load environment variables from .env file
 require('dotenv').config();
 
-const { app, BrowserWindow, globalShortcut, ipcMain } = require('electron');
+const { app, BrowserWindow, globalShortcut, ipcMain, Menu, Tray, nativeImage } = require('electron');
 const path = require('path');
 const { captureScreen } = require('./capture');
 const { createOverlay, destroyOverlay } = require('./overlay-manager');
@@ -9,24 +9,112 @@ const { extractRegion } = require('./region-extractor');
 const { convertBufferToPNGBase64 } = require('./image-converter');
 const { sendImageToGemini, extractLaTeXFromResponse } = require('./gemini-client');
 const { copyToClipboard } = require('./clipboard-handler');
+const { getApiKey, setApiKey, deleteApiKey } = require('./secure-store');
 
 // Application state
 let appState = 'idle';
 let screenshotData = null;
 
-// Keep a global reference of hidden window to maintain global shortcuts
-let hiddenWindow = null;
+// Keep a global reference of main window
+let mainWindow = null;
+let tray = null;
+let isQuitting = false;
 
-function createHiddenWindow() {
-  hiddenWindow = new BrowserWindow({
-    width: 1,
-    height: 1,
+function createMainWindow() {
+  mainWindow = new BrowserWindow({
+    width: 520,
+    height: 380,
+    resizable: false,
     show: false,
-    skipTaskbar: true,
+    title: 'gpix',
     webPreferences: {
-      nodeIntegration: false
+      contextIsolation: false,
+      nodeIntegration: true
     }
   });
+
+  mainWindow.loadFile(path.join(__dirname, '../renderer/settings.html'));
+
+  mainWindow.on('close', (event) => {
+    if (!isQuitting) {
+      event.preventDefault();
+      mainWindow.hide();
+    }
+  });
+
+  mainWindow.on('closed', () => {
+    mainWindow = null;
+  });
+
+  mainWindow.once('ready-to-show', () => {
+    mainWindow.show();
+    if (!app.isPackaged) {
+      mainWindow.webContents.openDevTools({ mode: 'detach' });
+    }
+  });
+}
+
+function openMainWindow() {
+  if (!mainWindow) {
+    createMainWindow();
+    return;
+  }
+
+  mainWindow.show();
+  mainWindow.focus();
+}
+
+function getTrayImage() {
+  const fallbackDataUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=';
+  const trayIconPath = path.join(__dirname, '../../build/icon.png');
+  const imageFromPath = nativeImage.createFromPath(trayIconPath);
+
+  if (!imageFromPath.isEmpty()) {
+    return imageFromPath;
+  }
+
+  return nativeImage.createFromDataURL(fallbackDataUrl);
+}
+
+function createTray() {
+  if (tray) {
+    return;
+  }
+
+  tray = new Tray(getTrayImage());
+  tray.setToolTip('gpix');
+
+  const contextMenu = Menu.buildFromTemplate([
+    { label: 'Open gpix', click: openMainWindow },
+    { type: 'separator' },
+    { label: 'Quit', click: () => app.quit() }
+  ]);
+
+  tray.setContextMenu(contextMenu);
+  tray.on('click', openMainWindow);
+}
+
+function createAppMenu() {
+  const template = [
+    {
+      label: 'gpix',
+      submenu: [
+        { label: 'Open gpix', click: openMainWindow },
+        { type: 'separator' },
+        { role: 'quit' }
+      ]
+    },
+    {
+      label: 'Edit',
+      submenu: [
+        { role: 'copy' },
+        { role: 'paste' },
+        { role: 'selectAll' }
+      ]
+    }
+  ];
+
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 }
 
 async function handleScreenshotShortcut() {
@@ -136,9 +224,28 @@ ipcMain.handle('get-scale-factor', () => {
   return screen.getPrimaryDisplay().scaleFactor;
 });
 
-app.whenReady().then(() => {
-  // Create hidden window to maintain app presence
-  createHiddenWindow();
+ipcMain.handle('settings-get-key', async () => {
+  return getApiKey();
+});
+
+ipcMain.handle('settings-save-key', async (event, apiKey) => {
+  await setApiKey(apiKey);
+  return true;
+});
+
+ipcMain.handle('settings-clear-key', async () => {
+  await deleteApiKey();
+  return true;
+});
+
+ipcMain.on('settings-quit-app', () => {
+  app.quit();
+});
+
+app.whenReady().then(async () => {
+  createMainWindow();
+  createTray();
+  createAppMenu();
   
   // Register global shortcut (Ctrl+Shift+S)
   const shortcutRegistered = globalShortcut.register('CommandOrControl+Shift+S', handleScreenshotShortcut);
@@ -158,6 +265,10 @@ app.on('window-all-closed', () => {
   // User must explicitly quit from tray or task manager
 });
 
+app.on('before-quit', () => {
+  isQuitting = true;
+});
+
 app.on('will-quit', () => {
   // Unregister all shortcuts
   globalShortcut.unregisterAll();
@@ -165,8 +276,10 @@ app.on('will-quit', () => {
 
 app.on('activate', () => {
   // On macOS, recreate hidden window if closed
-  if (BrowserWindow.getAllWindows().length === 0) {
-    createHiddenWindow();
+  if (!mainWindow) {
+    createMainWindow();
+  } else {
+    openMainWindow();
   }
 });
 
