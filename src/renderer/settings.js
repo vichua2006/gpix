@@ -202,17 +202,17 @@ function SettingsApp() {
       ),
       React.createElement(
         'button',
-        { className: 'danger', onClick: handleQuit },
-        'Quit app'
-      ),
-      React.createElement(
-        'button',
-        { className: 'ghost', onClick: () => testApiKey(apiKey), disabled: loading || connectionStatus === 'checking' || !apiKey.trim() },
+        { className: 'success-outline', onClick: () => testApiKey(apiKey), disabled: loading || connectionStatus === 'checking' || !apiKey.trim() },
         'Test key'
       ),
       React.createElement(
         'button',
-        { className: 'ghost', onClick: handleClear, disabled: loading },
+        { className: 'danger-outline', onClick: handleQuit },
+        'Quit app'
+      ),
+      React.createElement(
+        'button',
+        { className: 'danger-outline', onClick: handleClear, disabled: loading },
         'Delete key'
       )
     ),

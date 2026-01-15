@@ -120,22 +120,15 @@ label {
 .connection-status {
   font-size: 12px;
   font-weight: 500;
-  padding: 2px 8px;
-  border-radius: 4px;
-}
-
-.connection-status.checking {
   color: var(--muted);
 }
 
 .connection-status.valid {
-  color: #22c55e;
-  background: rgba(34, 197, 94, 0.1);
+  color: rgba(74, 162, 99, 0.85);
 }
 
 .connection-status.invalid {
-  color: var(--danger);
-  background: rgba(255, 107, 107, 0.1);
+  color: rgba(255, 107, 107, 0.85);
 }
 
 .actions {
@@ -160,12 +153,13 @@ button:disabled {
 }
 
 .primary {
-  background: var(--primary);
-  color: #fff;
+  background: transparent;
+  color: var(--primary);
+  border: 1px solid var(--primary);
 }
 
 .primary:hover {
-  background: var(--primary-hover);
+  background: rgba(91, 140, 255, 0.1);
 }
 
 .ghost {
@@ -174,13 +168,30 @@ button:disabled {
   border: 1px solid var(--border);
 }
 
-.danger {
-  background: var(--danger);
-  color: #fff;
+.ghost:hover {
+  background: var(--border);
 }
 
-.danger:hover {
-  background: var(--danger-hover);
+.success-outline {
+  background: transparent;
+  color: rgba(74, 162, 99, 0.85);
+  border: 1px solid rgba(74, 162, 99, 0.65);
+}
+
+.success-outline:hover {
+  border-color: rgba(74, 162, 99, 0.85);
+  background: rgba(74, 162, 99, 0.08);
+}
+
+.danger-outline {
+  background: transparent;
+  color: rgba(255, 107, 107, 0.7);
+  border: 1px solid rgba(255, 107, 107, 0.4);
+}
+
+.danger-outline:hover {
+  border-color: rgba(255, 107, 107, 0.6);
+  background: rgba(255, 107, 107, 0.05);
 }
 
 .status {
