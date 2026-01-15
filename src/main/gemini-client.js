@@ -78,20 +78,9 @@ const MODEL = 'gemini-2.5-flash-lite';
  * @returns {Promise<Object>} API response object
  */
 async function sendImageToGemini(base64Image, prompt = PROMPT) {
-  // #region agent log
-  fetch('http://127.0.0.1:7243/ingest/c32de97a-f444-4ff3-ae58-a27bcdf59522',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'gemini-client.js:sendImageToGemini:entry',message:'sendImageToGemini called',data:{hasBase64Image:!!base64Image,imageLength:base64Image?base64Image.length:0},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A,B,C,D,E'})}).catch(()=>{});
-  // #endregion
-
   const apiKey = await getApiKey();
   
-  // #region agent log
-  fetch('http://127.0.0.1:7243/ingest/c32de97a-f444-4ff3-ae58-a27bcdf59522',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'gemini-client.js:sendImageToGemini:gotKey',message:'getApiKey returned',data:{hasApiKey:!!apiKey,apiKeyLength:apiKey?apiKey.length:0},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A,B,C,D,E'})}).catch(()=>{});
-  // #endregion
-
   if (!apiKey) {
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/c32de97a-f444-4ff3-ae58-a27bcdf59522',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'gemini-client.js:sendImageToGemini:noKey',message:'No API key - throwing error',data:{},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A,B,C,D,E'})}).catch(()=>{});
-    // #endregion
     throw new Error('GEMINI_API_KEY environment variable is not set');
   }
   
