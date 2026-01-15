@@ -225,7 +225,7 @@ ipcMain.handle('get-scale-factor', () => {
 });
 
 ipcMain.handle('settings-get-key', async () => {
-  return getApiKey();
+  return await getApiKey();
 });
 
 ipcMain.handle('settings-save-key', async (event, apiKey) => {
