@@ -239,6 +239,7 @@ ipcMain.handle('settings-clear-key', async () => {
 });
 
 ipcMain.on('settings-quit-app', () => {
+  isQuitting = true;
   app.quit();
 });
 
