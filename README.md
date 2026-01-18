@@ -29,8 +29,8 @@ Download the latest installer from the [GitHub Releases](https://github.com/YOUR
 ## Usage
 
 ### Settings Window
+<img width="886" height="585" alt="image" src="https://github.com/user-attachments/assets/eb20ebfb-771c-40bd-abe3-f1e87eb88ab4" />
 
-![gpix settings window](./assets/settings-screenshot.png)
 
 On launch, gpix opens a settings window with four buttons:
 
