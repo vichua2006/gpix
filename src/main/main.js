@@ -240,6 +240,10 @@ ipcMain.handle('settings-clear-key', async () => {
 
 ipcMain.on('settings-quit-app', () => {
   isQuitting = true;
+  if (tray) {
+    tray.destroy();
+    tray = null;
+  }
   app.quit();
 });
 
@@ -317,6 +321,10 @@ app.on('window-all-closed', () => {
 
 app.on('before-quit', () => {
   isQuitting = true;
+  if (tray) {
+    tray.destroy();
+    tray = null;
+  }
 });
 
 app.on('will-quit', () => {
