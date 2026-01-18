@@ -24,55 +24,31 @@ why pay 6 dollars a month for Mathpix when you can use a Gemini wrapper? 😋
 
 ## Installation
 
-```bash
-npm install
-```
+Download the latest installer from the [GitHub Releases](https://github.com/YOUR_USERNAME/gpix/releases) page and run `gpix Setup x.x.x.exe`.
 
 ## Usage
 
-### Development
-```bash
-npm start
-```
+### Settings Window
 
-### Building the Executable
-First, build the portable executable:
-```bash
-npm run build
-```
-This creates `dist/gpix 1.0.0.exe` (Windows portable executable).
+![gpix settings window](./assets/settings-screenshot.png)
 
-### Running the Built Executable
-Use the provided shell script to run the executable with proper process management:
-```bash
-./run-gpix.sh
-```
-The script will:
-- Launch the app from `dist/gpix 1.0.0.exe`
-- Track the process ID for easy stopping
-- Allow you to stop the app with `Ctrl+C`
+On launch, gpix opens a settings window with four buttons:
 
-**Note:** The app runs in the background with global shortcuts. Use the shell script to ensure you can stop it properly.
+| Button | Description |
+|--------|-------------|
+| **Save key** | Saves your Gemini API key securely to the system keychain |
+| **Test key** | Validates your API key by testing connectivity to Gemini |
+| **Quit app** | Closes gpix completely |
+| **Delete key** | Removes the stored API key from your keychain |
 
-### Setting Up a CLI Alias
+### Capturing Equations
 
-To run `gpix` from anywhere, add an alias to your shell configuration:
+1. Press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd> (or <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd> on macOS) anywhere
+2. Drag to select the region containing your equation
+3. Release to capture — the LaTeX is automatically copied to your clipboard
+4. Paste anywhere with <kbd>Ctrl</kbd>+<kbd>V</kbd>
 
-**Unix/Linux/Git Bash:**
-Add to `~/.bashrc` or `~/.bash_profile`:
-```bash
-alias gpix='cd /path/to/gpix && ./run-gpix.sh'
-```
-Then reload: `source ~/.bashrc`
-
-**Windows CMD:**
-Create a batch file `gpix.bat` in a directory in your PATH:
-```batch
-@echo off
-cd /d "C:\path\to\gpix"
-bash run-gpix.sh
-```
-Replace `C:\path\to\gpix` with your actual project path.
+Press <kbd>ESC</kbd> at any time to cancel the selection.
 
 # Liscense
 MIT
