@@ -1,7 +1,10 @@
 // Load environment variables from .env file
 require('dotenv').config();
 
-const { app, BrowserWindow, globalShortcut, ipcMain, Menu, Tray, nativeImage } = require('electron');
+const { app, BrowserWindow, globalShortcut, ipcMain, Menu, Tray, nativeImage, nativeTheme } = require('electron');
+
+// Force dark mode regardless of system settings
+nativeTheme.themeSource = 'dark';
 const path = require('path');
 const { captureScreen } = require('./capture');
 const { createOverlay, destroyOverlay } = require('./overlay-manager');
@@ -26,7 +29,14 @@ function createMainWindow() {
     height: 380,
     resizable: false,
     show: false,
-    title: 'gpix',
+    title: '',
+    titleBarStyle: 'hidden',
+    titleBarOverlay: {
+      color: '#0f1115',
+      symbolColor: '#e6e9ef',
+      height: 36
+    },
+    icon: path.join(__dirname, '../../build/icon.png'),
     webPreferences: {
       contextIsolation: false,
       nodeIntegration: true
@@ -95,26 +105,7 @@ function createTray() {
 }
 
 function createAppMenu() {
-  const template = [
-    {
-      label: 'gpix',
-      submenu: [
-        { label: 'Open gpix', click: openMainWindow },
-        { type: 'separator' },
-        { role: 'quit' }
-      ]
-    },
-    {
-      label: 'Edit',
-      submenu: [
-        { role: 'copy' },
-        { role: 'paste' },
-        { role: 'selectAll' }
-      ]
-    }
-  ];
-
-  Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+  Menu.setApplicationMenu(null);
 }
 
 async function handleScreenshotShortcut() {

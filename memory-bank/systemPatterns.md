@@ -77,6 +77,8 @@
 ## Key Technical Decisions
 
 ### Window Configuration
+
+#### Overlay Window (Screenshot Selection)
 ```javascript
 {
   transparent: true,
@@ -91,6 +93,32 @@
   }
 }
 ```
+
+#### Main Window (Settings UI)
+```javascript
+{
+  width: 520,
+  height: 380,
+  resizable: false,
+  title: '',  // Empty title removes text and icon
+  titleBarStyle: 'hidden',  // Hides title bar, keeps window controls
+  titleBarOverlay: {  // Windows-only: shows overlay buttons
+    color: '#0f1115',      // Background color (matches dark theme)
+    symbolColor: '#e6e9ef', // Button icon color
+    height: 36
+  },
+  icon: path.join(__dirname, '../../build/icon.png'),
+  webPreferences: {
+    contextIsolation: false,  // TODO: re-enable for production
+    nodeIntegration: true     // TODO: remove for production
+  }
+}
+```
+
+**Cross-platform behavior:**
+- **macOS**: `titleBarStyle: 'hidden'` shows native traffic light buttons (top-left); `titleBarOverlay` is ignored
+- **Windows**: `titleBarStyle: 'hidden'` + `titleBarOverlay` shows themed minimize/maximize/close buttons (top-right)
+- **CSS**: `body { -webkit-app-region: drag; padding-top: 48px; }` enables window dragging and reserves space for controls
 
 ### Selection Flow
 1. User presses shortcut → Main process captures screen

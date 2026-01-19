@@ -152,6 +152,18 @@ physicalX = Math.round(logicalX * scaleFactor);
 - Border: Red (#FF0000), 2px
 - Min selection: 5x5 pixels
 
+### Window Chrome Configuration
+- **Title Bar Style**: `hidden` (removes title bar, keeps native controls)
+- **Title**: Empty string (removes title text and default Electron icon)
+- **Menu**: `null` (removes application menu entirely)
+- **Theme**: Forced dark mode via `nativeTheme.themeSource = 'dark'`
+- **Windows Title Bar Overlay**: 
+  - Background: `#0f1115` (dark theme)
+  - Symbol color: `#e6e9ef` (light text)
+  - Height: 36px
+- **CSS Drag Region**: `body { -webkit-app-region: drag; }` with `no-drag` on interactive elements
+- **Top Padding**: 48px to accommodate window controls
+
 ### Configuration (Phase 2)
 - **API Key**: Stored in OS keychain via keytar; `.env` used as dev fallback only
 - **API Version**: v1 (stable)

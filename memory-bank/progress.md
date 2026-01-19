@@ -47,8 +47,10 @@
 - [x] Tray/menu actions for Open/Quit
 - [x] Simplified settings UI (removed card container, direct window layout)
 - [x] Global shortcut description with styled kbd elements
-- [x] API key connectivity test (on startup + manual "Test key" button)
+- [x] API key connectivity test (on startup, on save, and manual "Test key" button)
 - [x] Eye icon toggle for API key visibility
+- [x] Custom title bar: removed menu bar, title text, and default Electron icon
+- [x] Cross-platform window controls (macOS traffic lights, Windows overlay buttons)
 
 ## What's Left to Build
 

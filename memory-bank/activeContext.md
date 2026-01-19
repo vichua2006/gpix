@@ -1,13 +1,26 @@
 # Active Context
 
 ## Current Work Focus
-**Settings UI polish complete**
+**Window chrome customization complete**
 
-Main UI window (React-based) with keychain API key storage, tray/menu access, API key validation, and visibility toggle. Packaging configured for NSIS (Windows) and DMG (macOS).
+Main UI window (React-based) with keychain API key storage, tray/menu access, API key validation, and visibility toggle. Packaging configured for NSIS (Windows) and DMG (macOS). Clean title bar with no menu, no title text, and no default Electron icon.
 
 ## Recent Changes
+- **Custom Title Bar**: Cleaned up window chrome for a minimal, modern look
+  - Removed application menu bar entirely (`Menu.setApplicationMenu(null)`)
+  - Set `titleBarStyle: 'hidden'` for frameless title bar
+  - Added `titleBarOverlay` for Windows with theme-matched colors (`#0f1115` background, `#e6e9ef` symbols)
+  - Empty `title: ''` removes title text and default Electron icon
+  - macOS uses native traffic light buttons (automatically shown with `titleBarStyle: 'hidden'`)
+  - Windows shows minimize/maximize/close overlay buttons in top-right
+  - CSS drag region (`-webkit-app-region: drag`) enables window dragging from content area
+  - 48px top padding accommodates window controls on both platforms
+- **Forced Dark Mode**: App always uses dark theme regardless of system settings
+  - Set `nativeTheme.themeSource = 'dark'` to force dark mode
+  - CSS light mode media query is now ignored
 - **API Key Validation**: Added connectivity test that validates API key against gemini-2.5-flash-lite model
   - Tests automatically on startup if API key exists
+  - Tests automatically when saving a new key (triggers validation after save)
   - Manual "Test key" button for on-demand testing
   - Status indicator shows: "Checking...", "✓ Valid", or "✗ Invalid"
   - Detailed error messages for invalid keys (format, auth, model access)
@@ -63,6 +76,7 @@ Main UI window (React-based) with keychain API key storage, tray/menu access, AP
 1. Revisit security: re-enable contextIsolation and remove nodeIntegration for main UI
 2. Add app icons (tray/app) for dev and build assets
 3. Optional: add shortcut customization UI
+4. Optional: make `titleBarOverlay` colors adapt to system light/dark theme
 
 ## Key Decisions Made
 

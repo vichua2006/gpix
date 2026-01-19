@@ -38,6 +38,18 @@ body {
 
 body {
   padding: 24px;
+  /* Extra top padding for macOS traffic light buttons */
+  padding-top: 48px;
+  -webkit-app-region: drag;
+}
+
+/* Make interactive elements clickable (not draggable) */
+button,
+input,
+a,
+.actions,
+.field {
+  -webkit-app-region: no-drag;
 }
 
 .card {

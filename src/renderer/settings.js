@@ -68,6 +68,8 @@ function SettingsApp() {
     try {
       await ipcRenderer.invoke('settings-save-key', apiKey.trim());
       setStatus('API key saved.');
+      // Trigger validation after saving
+      testApiKey(apiKey.trim());
     } catch (error) {
       setStatus(error.message || 'Failed to save API key.');
     } finally {
