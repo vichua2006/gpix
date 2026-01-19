@@ -13,6 +13,7 @@ const { convertBufferToPNGBase64 } = require('./image-converter');
 const { sendImageToGemini, extractLaTeXFromResponse } = require('./gemini-client');
 const { copyToClipboard } = require('./clipboard-handler');
 const { getApiKey, setApiKey, deleteApiKey } = require('./secure-store');
+const { showToast } = require('./toast-manager');
 
 // Application state
 let appState = 'idle';
@@ -185,15 +186,18 @@ ipcMain.on('selection-complete', async (event, rect) => {
     
     // Copy to clipboard
     const clipboardSuccess = copyToClipboard(latex);
-    if (!clipboardSuccess) {
+    if (clipboardSuccess) {
+      showToast('LaTeX copied to clipboard', 'success');
+    } else {
       console.warn('Warning: Failed to copy LaTeX to clipboard, but LaTeX was extracted successfully');
+      showToast('Failed to copy to clipboard', 'error');
     }
     
     console.log('Process completed successfully');
     
   } catch (error) {
     console.error('Error during processing:', error.message);
-    // Errors are logged but don't prevent cleanup
+    showToast('Processing failed', 'error');
   } finally {
     // Final cleanup
     screenshotData = null;

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Toast</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 100vw;
+      height: 100vh;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      overflow: hidden;
+    }
+
+    .toast {
+      padding: 16px 24px;
+      border-radius: 8px;
+      color: white;
+      font-size: 14px;
+      font-weight: 500;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      opacity: 0;
+      transform: translateY(10px);
+      animation: fadeIn 0.2s ease-out forwards;
+      max-width: 280px;
+      word-wrap: break-word;
+    }
+
+    .toast.success {
+      background: #22c55e;
+    }
+
+    .toast.error {
+      background: #ef4444;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeOut {
+      from {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      to {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+    }
+
+    .toast.hiding {
+      animation: fadeOut 0.2s ease-in forwards;
+    }
+  </style>
+</head>
+<body>
+  <div id="toast" class="toast"></div>
+  <script>
+    window.toastAPI.onToastData((data) => {
+      const toast = document.getElementById('toast');
+      toast.textContent = data.message;
+      toast.classList.add(data.type);
+    });
+
+    window.toastAPI.onHide(() => {
+      const toast = document.getElementById('toast');
+      toast.classList.add('hiding');
+    });
+  </script>
+</body>
+</html>

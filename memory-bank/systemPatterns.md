@@ -64,9 +64,16 @@
    - Currently just returns image data
 
 6. **Main UI Window**
-  - React-based UI for API key management
-  - Runs as the primary app window (no separate settings window)
-  - Tray/menu opens and focuses this window
+   - React-based UI for API key management
+   - Runs as the primary app window (no separate settings window)
+   - Tray/menu opens and focuses this window
+
+7. **Toast Manager**
+   - Creates frameless transparent toast windows for user feedback
+   - Shows success (green) or error (red) notifications
+   - Positioned at bottom-center of screen
+   - Auto-dismisses after 2.5 seconds with fade animations
+   - Uses `showInactive()` to avoid stealing focus
 
 ### Renderer Process (Overlay Window)
 - Lightweight renderer for overlay display
@@ -119,6 +126,31 @@
 - **macOS**: `titleBarStyle: 'hidden'` shows native traffic light buttons (top-left); `titleBarOverlay` is ignored
 - **Windows**: `titleBarStyle: 'hidden'` + `titleBarOverlay` shows themed minimize/maximize/close buttons (top-right)
 - **CSS**: `body { -webkit-app-region: drag; padding-top: 48px; }` enables window dragging and reserves space for controls
+
+#### Toast Window (Notifications)
+```javascript
+{
+  width: 340,
+  height: 100,  // Larger than toast element to prevent shadow clipping
+  frame: false,
+  transparent: true,
+  alwaysOnTop: true,
+  skipTaskbar: true,
+  focusable: false,  // Prevents stealing focus
+  resizable: false,
+  movable: false,
+  show: false,  // Use showInactive() after content loads
+  webPreferences: {
+    nodeIntegration: false,
+    contextIsolation: true,
+    preload: 'toast-preload.js'
+  }
+}
+```
+
+**Toast positioning:** Bottom-center of screen, 40px from bottom edge of work area.
+
+**Animation:** Fade-in on show (0.2s ease-out), fade-out before close (0.2s ease-in). Manager sends 'toast-hide' IPC event, waits 200ms for animation, then destroys window.
 
 ### Selection Flow
 1. User presses shortcut → Main process captures screen

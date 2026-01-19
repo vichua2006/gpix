@@ -51,6 +51,7 @@
 - [x] Eye icon toggle for API key visibility
 - [x] Custom title bar: removed menu bar, title text, and default Electron icon
 - [x] Cross-platform window controls (macOS traffic lights, Windows overlay buttons)
+- [x] Toast notifications for clipboard operations (success/error feedback)
 
 ## What's Left to Build
 
@@ -114,9 +115,10 @@
 
 ## Notes
 - Dependencies: electron (dev), sharp, dotenv, electron-builder (dev)
-- Modular structure with separate modules for API, image conversion, clipboard
+- Modular structure with separate modules for API, image conversion, clipboard, toast notifications
 - Production-ready for core functionality
 - Requires GEMINI_API_KEY in .env file
 - Build: Run `npm run build` to create portable executable in `dist/` directory
 - Build format: Portable `.exe` (no installer, no code signing required)
+- Toast system: `toast-manager.js` (main), `toast-preload.js` (IPC bridge), `toast.html` (renderer)
 

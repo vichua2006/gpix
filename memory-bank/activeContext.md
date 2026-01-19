@@ -1,11 +1,19 @@
 # Active Context
 
 ## Current Work Focus
-**Window chrome customization complete**
+**Toast notification system implemented**
 
-Main UI window (React-based) with keychain API key storage, tray/menu access, API key validation, and visibility toggle. Packaging configured for NSIS (Windows) and DMG (macOS). Clean title bar with no menu, no title text, and no default Electron icon.
+Main UI window (React-based) with keychain API key storage, tray/menu access, API key validation, and visibility toggle. Packaging configured for NSIS (Windows) and DMG (macOS). Clean title bar with no menu, no title text, and no default Electron icon. Toast notifications provide visual feedback for clipboard operations.
 
 ## Recent Changes
+- **Toast Notifications**: Added platform-independent toast system for clipboard feedback
+  - New files: `toast-manager.js`, `toast-preload.js`, `toast.html`
+  - Shows success toast (green) when LaTeX copied to clipboard
+  - Shows error toast (red) when clipboard copy or processing fails
+  - Frameless transparent BrowserWindow positioned at bottom-center of screen
+  - Auto-dismisses after 2.5 seconds with fade-in/fade-out animations
+  - Does not steal focus from user's active application (`showInactive()`)
+  - Window sized larger than toast element (340x100) to prevent shadow clipping
 - **Custom Title Bar**: Cleaned up window chrome for a minimal, modern look
   - Removed application menu bar entirely (`Menu.setApplicationMenu(null)`)
   - Set `titleBarStyle: 'hidden'` for frameless title bar
