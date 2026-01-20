@@ -24,7 +24,7 @@ why pay 6 dollars a month for Mathpix when you can use a Gemini wrapper? 😋
 
 ## Installation
 
-Download the latest installer from the [GitHub Releases](https://github.com/YOUR_USERNAME/gpix/releases) page and run `gpix Setup x.x.x.exe`.
+Download the latest installer from the [GitHub Releases](https://github.com/vichua2006/gpix/releases) page and run `gpix Setup x.x.x.exe`.
 
 ## Usage
 
@@ -40,6 +40,9 @@ On launch, gpix opens a settings window with four buttons:
 | **Test key** | Validates your API key by testing connectivity to Gemini |
 | **Quit app** | Closes gpix completely |
 | **Delete key** | Removes the stored API key from your keychain |
+
+Just enter & save your API key, and you're good to go!
+(note it should be setup for `gemini-2.5-flash-lite`, test it with the `test` button!) 
 
 ### Capturing Equations
 
