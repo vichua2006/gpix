@@ -36,6 +36,10 @@ function showToast(message, type = 'success') {
     y: y,
     frame: false,
     transparent: true,
+    backgroundColor: '#00000000',
+    // CSS draws the toast's rounded corners and shadow, not the native window.
+    hasShadow: false,
+    roundedCorners: process.platform !== 'darwin',
     alwaysOnTop: true,
     skipTaskbar: true,
     focusable: false,

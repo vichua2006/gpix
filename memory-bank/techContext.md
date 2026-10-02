@@ -70,8 +70,9 @@ gpix/
 - Global shortcut works (hidden window maintains app presence)
 
 #### macOS
-- Global shortcuts require accessibility permissions
-- Cross-platform compatible but not primary focus
+- Capture requires Screen Recording permission for the installed app. Replacing an ad-hoc-signed bundle can invalidate its grant.
+- Selection uses a screen-sized panel over the current Space; do not use native macOS fullscreen.
+- Shortcut is Cmd+Shift+S; capture is limited to the primary display.
 
 ### Electron Implementation Details
 - Hidden window required to maintain global shortcut
@@ -147,7 +148,7 @@ physicalX = Math.round(logicalX * scaleFactor);
 ## Configuration
 
 ### Hard-coded Settings (Phase 1)
-- Global shortcut: `Ctrl+Shift+S`
+- Global shortcut: `CommandOrControl+Shift+S` (Cmd+Shift+S on macOS, Ctrl+Shift+S elsewhere)
 - Dimming: 0.5 brightness
 - Border: Red (#FF0000), 2px
 - Min selection: 5x5 pixels
@@ -168,7 +169,7 @@ physicalX = Math.round(logicalX * scaleFactor);
 - **API Key**: Stored in OS keychain via keytar; `.env` used as dev fallback only
 - **API Version**: v1 (stable)
 - **Model**: gemini-2.5-flash-lite (can be changed in gemini-client.js)
-- **Generation Config**: maxOutputTokens: 256, temperature: 0.1 (optimized for speed)
+- **Generation Config**: maxOutputTokens: 2048, temperature: 0.1
 - **Image Optimization**: Auto-resize to max 1024px (longest side), PNG compression level 6
 - **Prompt**: Stored as constant in gemini-client.js
 - **Result Delivery**: Clipboard (automatic copy)
@@ -188,7 +189,10 @@ physicalX = Math.round(logicalX * scaleFactor);
   - NSIS for Windows, DMG for macOS
   - Code signing explicitly disabled (`sign: null`, `signDlls: false`)
   - Icon support (requires `build/icon.png` for Windows, optional)
-- **Known Issue:** Windows requires Developer Mode or admin privileges for code signing tool extraction (resolved by using portable format and disabling signing)
+- **Mac Targets:** Intel x64 and Apple Silicon arm64 DMGs; build each architecture separately.
+- **Mac Signing:** `build/sign-mac.js` uses electron-builder's @electron/osx-sign dependency. Without a supplied identity it signs ad-hoc; Developer ID signing/notarization are not configured.
+- **Native Modules:** sharp, @img, and keytar are unpacked from ASAR. CI verifies bundle signatures and loads packaged native modules.
+- **CI:** `.github/workflows/build.yml` builds installers for main pushes/PRs/manual runs. Matching version tags create a draft release with all three installers after successful builds; publication remains manual.
 - **Running the App:** Use `./run-gpix.sh` shell script for proper process management (allows stopping with Ctrl+C)
 
 ## Environment Requirements
@@ -199,3 +203,8 @@ physicalX = Math.round(logicalX * scaleFactor);
 - Gemini API key (set in .env file as GEMINI_API_KEY)
 - Build tools may be required for sharp native bindings (usually auto-installed)
 
+
+## Agent Rules
+- Set `AI_AGENT=true` for every project command (`.cursor/00-default.mdc`).
+- Stop immediately on the production-operations prevention error.
+- For project continuation and requested memory-bank updates, review every memory-bank file (`.cursor/01-memory.mdc`). Update current state, next steps, and decisions, especially activeContext.md and progress.md.

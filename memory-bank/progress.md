@@ -1,124 +1,50 @@
 # Progress
 
 ## What Works
-
-### Phase 1: Screenshot & Selection UI ✓ COMPLETE
-- [x] Electron project structure
-- [x] Global shortcut (Ctrl+Shift+S)
-- [x] Screenshot capture with desktopCapturer
-- [x] DPI scaling detection and coordinate mapping
-- [x] Transparent fullscreen overlay window
-- [x] WebGL GPU-accelerated rendering
-- [x] Shader-based dimming and selection masking
-- [x] Red rectangle border rendering
-- [x] Mouse drag selection tracking
-- [x] ESC key cancellation with cleanup
-- [x] Region extraction from buffer
-- [x] IPC communication (main ↔ renderer)
-
-**Application Status:** Running and functional
-
-### Phase 2: API Integration ✓ COMPLETE
-- [x] Gemini API client setup
-- [x] Image encoding/preparation (base64 PNG)
-- [x] Prompt template for equation extraction
-- [x] API request with error handling
-- [x] Response parsing
-- [x] LaTeX result display (clipboard)
-- [x] Environment variable configuration (dotenv)
-- [x] Overlay window closes immediately after selection
-
-**Application Status:** Fully functional with API integration
-
-### Operational Tooling ✓ COMPLETE
-- [x] Shell script for running and stopping the app (`run-gpix.sh`)
-  - Process management with PID tracking
-  - Ctrl+C signal handling for graceful shutdown
-  - Prevents multiple instances
-  - Automatic cleanup on exit
-
-**Application Status:** Fully functional with operational tooling
-
-### Distribution & UI ✓ IN PROGRESS
-- [x] Windows NSIS installer target
-- [x] macOS DMG target
-- [x] Main UI window (React) for API key management
-- [x] Keychain storage via keytar (with .env dev fallback)
-- [x] Tray/menu actions for Open/Quit
-- [x] Simplified settings UI (removed card container, direct window layout)
-- [x] Global shortcut description with styled kbd elements
-- [x] API key connectivity test (on startup, on save, and manual "Test key" button)
-- [x] Eye icon toggle for API key visibility
-- [x] Custom title bar: removed menu bar, title text, and default Electron icon
-- [x] Cross-platform window controls (macOS traffic lights, Windows overlay buttons)
-- [x] Toast notifications for clipboard operations (success/error feedback)
-
-## What's Left to Build
-
-### Future Enhancements
-- [ ] Multi-monitor support
-- [ ] Customizable shortcuts
-- [ ] Save cropped images to file
-- [ ] Configuration UI (advanced settings)
+- Screenshot capture with Electron desktopCapturer and primary-display DPI mapping.
+- Screen-sized WebGL selection with dimming, red rectangle, drag selection, and Escape cancellation.
+- BGRA-to-RGBA conversion, physical-resolution canvas, nearest-neighbor filtering, and integer region bounds.
+- Gemini API conversion, optimized PNG preparation, and automatic LaTeX clipboard copy.
+- React settings window, API key validation/visibility toggle, keytar storage, and .env development fallback.
+- Tray Open/Quit actions, app icon, custom title bar, and dark theme.
+- Success/error toasts with CSS fades and 2.5-second dismissal.
+- Windows x64 NSIS installer and separate Mac Intel/Apple Silicon DMG targets.
 
 ## Current Status
-**Status:** Core functionality complete with UI + keychain storage
-**Phase:** Distribution UI integration in progress
-**Next Milestone:** Harden main UI security (remove nodeIntegration), add icons, validate installer on macOS
-**Build Status:** electron-builder configured, NSIS/DMG targets working on Windows
+Version 1.0.3 contains the macOS window fixes and updated release documentation. Local checks passed; the tagged release build is pending the push and CI completion.
 
-## Known Issues
-- Main UI currently uses `nodeIntegration: true` to load React in dev; should be replaced with preload + bundling for production security
+## Fixes in 1.0.3
+- macOS selection opens as a panel over the current Space instead of entering native fullscreen and animating to a new Space.
+- Overlay covers the primary display at its actual origin, including menu bar and Dock.
+- Missing Mac Screen Recording permission produces a warning and resets capture state, rather than presenting an incomplete screenshot.
+- Toast native shadow and macOS native window corners are disabled; CSS controls the visible shape and shadow.
 
-## Previously Fixed Issues
-- **Image flip (180° rotation)**: Resolved by Y-coordinate flip in vertex shader
-- **Selection rectangle vertical inversion**: Resolved by using screen coordinates directly (texture coordinates already flipped)
-- **Global shortcut error message**: Resolved by changing to informational message
-- **Color hue distortion (red/blue swap)**: Resolved by adding BGRA to RGBA conversion in capture.js (Electron's `toBitmap()` returns BGRA on Windows)
-- **Image blurriness**: Resolved by:
-  - Setting canvas internal resolution to match physical screenshot resolution
-  - Converting mouse coordinates from CSS pixels to canvas pixels
-  - Using `gl.NEAREST` texture filtering instead of `gl.LINEAR`
-  - Rounding coordinates to integer pixel values for buffer extraction
-
-## Evolution of Decisions
-
-### Finalized Decisions
-- **Screenshot:** desktopCapturer (built-in, no dependencies)
-- **Rendering:** WebGL with shaders (GPU-accelerated)
-- **DPI Scaling:** Native Electron API (automatic)
-- **Shortcut:** Ctrl+Shift+S (hard-coded for Phase 1)
-- **Dimming:** 0.5 brightness factor
-- **Border:** Red 2px rectangle
-- **API:** Gemini API v1 with gemini-2.5-flash-lite model (optimized for speed)
-- **API Config:** maxOutputTokens: 256, temperature: 0.1 (fast, deterministic responses)
-- **Image Conversion:** sharp library (PNG format with auto-resize to max 1024px and compression)
-- **Environment Config:** dotenv for .env file support
-- **Result Display:** Clipboard copy (automatic)
-
-### Implementation Details
-- WebGL texture uploaded once per capture
-- Uniforms updated during drag (4 floats/frame)
-- Physical resolution capture, logical coordinate overlay
-- State machine: idle → capturing → selecting → processing → idle
-- Cleanup on ESC and completion
-- Overlay closes immediately after selection (before API call)
-- All image processing in-memory (no file storage)
-- API key loaded from .env file via dotenv
-- Image optimization: automatic resizing and compression for faster API processing (2-4x speed improvement)
+## CI and Release Behavior
+- Main pushes, main pull requests, and manual runs build installers and upload artifacts for 14 days.
+- Version tags (for example `1.0.3` or `v1.0.3`) must match `package.json` after stripping an optional `v`.
+- Tag builds create a draft GitHub release with all three installers after every platform build succeeds.
+- CI checks JavaScript syntax; Mac jobs additionally verify bundle signatures and load packaged sharp/keytar native modules.
+- Releases are not automatically published. Packaging checks do not replace manual screenshot/Gemini verification.
 
 ## Testing Status
-- Application launches successfully
-- Global shortcut registers correctly
-- Manual testing checklist available in TESTING.md
-- Ready for user acceptance testing
+- macOS panel: display bounds, no native fullscreen event, all-Spaces behavior, drag selection, and Escape cancellation passed in Electron.
+- Toast: success/error rendering, transparent corners, no native shadow, non-focusable window, and auto-dismissal passed in Electron.
+- Permission guard: denied/not-determined Mac states rejected; granted and Windows paths retained capture conversion.
+- Normal installed Mac app captured other apps after its stale Screen Recording grant was reset and re-added.
+- Local JavaScript syntax, whitespace, and matching package/lockfile version checks passed.
+- New installer runtime check and tagged CI build remain pending.
 
-## Notes
-- Dependencies: electron (dev), sharp, dotenv, electron-builder (dev)
-- Modular structure with separate modules for API, image conversion, clipboard, toast notifications
-- Production-ready for core functionality
-- Requires GEMINI_API_KEY in .env file
-- Build: Run `npm run build` to create portable executable in `dist/` directory
-- Build format: Portable `.exe` (no installer, no code signing required)
-- Toast system: `toast-manager.js` (main), `toast-preload.js` (IPC bridge), `toast.html` (renderer)
+## Known Issues and Follow-ups
+- Main UI uses nodeIntegration and disables context isolation for React loading; production hardening remains separate work.
+- Mac builds are ad-hoc signed; trusted Developer ID signing and notarization are not configured.
+- Replacing an ad-hoc-signed Mac app can invalidate its Screen Recording grant despite an enabled Settings toggle. Fully quit/reopen and, if necessary, regrant access to the exact installed app.
+- Primary-display capture only; multi-monitor support and shortcut customization remain future work.
 
+## Important Implementation Details
+- Shortcut: Cmd+Shift+S on macOS, Ctrl+Shift+S elsewhere (`CommandOrControl+Shift+S`).
+- State flow: idle → capturing → selecting → processing → idle.
+- Overlay closes before API processing; cleanup runs on Escape and completion.
+- Images stay in memory; sharp resizes to at most 1024px and compresses PNG.
+- Gemini configuration: v1 API, gemini-2.5-flash-lite, maxOutputTokens 2048, temperature 0.1.
+- API key: OS keychain; .env is only a development fallback.
+- Build commands: `npm run build:win -- nsis --x64 --publish never`; `npm run build:mac -- dmg --arm64 --publish never` (or `--x64`).

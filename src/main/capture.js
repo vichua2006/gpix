@@ -1,4 +1,4 @@
-const { desktopCapturer, screen } = require('electron');
+const { desktopCapturer, screen, systemPreferences } = require('electron');
 
 /**
  * Captures the primary display screenshot at physical resolution
@@ -35,6 +35,13 @@ async function captureScreen() {
     }
   });
   
+  // macOS can return wallpaper and our own windows even without permission.
+  if (process.platform === 'darwin' && systemPreferences.getMediaAccessStatus('screen') !== 'granted') {
+    const error = new Error('Enable gpix in System Settings → Privacy & Security → Screen & System Audio Recording, then fully quit gpix using Quit app and reopen it.');
+    error.code = 'SCREEN_RECORDING_PERMISSION';
+    throw error;
+  }
+
   if (!sources || sources.length === 0) {
     throw new Error('No screen sources available');
   }

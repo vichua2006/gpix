@@ -92,7 +92,10 @@
   frame: false,
   alwaysOnTop: true,
   skipTaskbar: true,
-  fullscreen: true,
+  fullscreen: process.platform !== 'darwin',
+  fullscreenable: process.platform !== 'darwin',
+  type: process.platform === 'darwin' ? 'panel' : undefined,
+  roundedCorners: process.platform !== 'darwin',
   focusable: true,  // Need to capture mouse events
   webPreferences: {
     nodeIntegration: false,  // Security best practice
@@ -100,6 +103,8 @@
   }
 }
 ```
+
+On macOS the overlay uses the primary display bounds, `enableLargerThanScreen: true`, and the `screen-saver` always-on-top level. Load the screenshot before showing the panel to avoid native fullscreen Spaces transitions.
 
 #### Main Window (Settings UI)
 ```javascript
@@ -134,6 +139,9 @@
   height: 100,  // Larger than toast element to prevent shadow clipping
   frame: false,
   transparent: true,
+  backgroundColor: '#00000000',
+  hasShadow: false,
+  roundedCorners: process.platform !== 'darwin',
   alwaysOnTop: true,
   skipTaskbar: true,
   focusable: false,  // Prevents stealing focus
@@ -147,6 +155,8 @@
   }
 }
 ```
+
+The toast's CSS draws its rounding and shadow; native macOS chrome must not add a second outline.
 
 **Toast positioning:** Bottom-center of screen, 40px from bottom edge of work area.
 
@@ -196,7 +206,7 @@
 
 ### Screenshot to Overlay Path
 1. `desktopCapturer.getSources()` captures at physical resolution
-2. `thumbnail.toBitmap()` returns BGRA buffer
+2. On macOS, require `systemPreferences.getMediaAccessStatus('screen') === 'granted'` after capture; otherwise show a permission warning and reset to idle. `thumbnail.toBitmap()` returns a BGRA buffer
 3. Convert BGRA to RGBA (swap red/blue channels)
 4. Pass RGBA buffer to overlay renderer process
 5. Set canvas internal resolution to match screenshot physical resolution

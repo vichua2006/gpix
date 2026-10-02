@@ -1,7 +1,7 @@
 // Load environment variables from .env file
 require('dotenv').config();
 
-const { app, BrowserWindow, globalShortcut, ipcMain, Menu, Tray, nativeImage, nativeTheme } = require('electron');
+const { app, BrowserWindow, globalShortcut, ipcMain, Menu, Tray, nativeImage, nativeTheme, dialog } = require('electron');
 
 // Force dark mode regardless of system settings
 nativeTheme.themeSource = 'dark';
@@ -131,6 +131,13 @@ async function handleScreenshotShortcut() {
     console.error('Screenshot capture failed:', error);
     appState = 'idle';
     screenshotData = null;
+    if (error.code === 'SCREEN_RECORDING_PERMISSION') {
+      await dialog.showMessageBox({
+        type: 'warning',
+        message: 'Screen Recording permission required',
+        detail: error.message
+      });
+    }
   }
 }
 

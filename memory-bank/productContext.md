@@ -12,17 +12,17 @@ Users often encounter mathematical equations in digital content (PDFs, websites,
 ## How It Should Work
 
 ### User Flow
-1. User presses global keyboard shortcut (default to be determined)
+1. User presses Cmd+Shift+S on macOS or Ctrl+Shift+S elsewhere
 2. Application captures current screen
-3. Full-screen overlay appears with dimmed screenshot
+3. Screen-sized overlay appears with dimmed screenshot; macOS uses a panel on the current Space
 4. User drags mouse to select region containing equation
 5. Selected region shows:
    - Red rectangle border
    - Restored brightness (normal lighting)
    - Rest of screen remains dimmed
 6. User releases mouse to confirm selection
-7. (Phase 2) Selected region sent to Gemini API
-8. (Phase 2) LaTeX result returned and displayed
+7. Overlay closes and the selected region is sent to Gemini API
+8. LaTeX result is copied to the clipboard and a toast confirms completion
 
 ### User Experience Goals
 - **Instant:** Global shortcut provides immediate access

@@ -1,158 +1,34 @@
 # Active Context
 
 ## Current Work Focus
-**Toast notification system implemented**
-
-Main UI window (React-based) with keychain API key storage, tray/menu access, API key validation, and visibility toggle. Packaging configured for NSIS (Windows) and DMG (macOS). Clean title bar with no menu, no title text, and no default Electron icon. Toast notifications provide visual feedback for clipboard operations.
+Release 1.0.3: macOS selection overlay and toast window rendering fixes.
 
 ## Recent Changes
-- **Toast Notifications**: Added platform-independent toast system for clipboard feedback
-  - New files: `toast-manager.js`, `toast-preload.js`, `toast.html`
-  - Shows success toast (green) when LaTeX copied to clipboard
-  - Shows error toast (red) when clipboard copy or processing fails
-  - Frameless transparent BrowserWindow positioned at bottom-center of screen
-  - Auto-dismisses after 2.5 seconds with fade-in/fade-out animations
-  - Does not steal focus from user's active application (`showInactive()`)
-  - Window sized larger than toast element (340x100) to prevent shadow clipping
-- **Custom Title Bar**: Cleaned up window chrome for a minimal, modern look
-  - Removed application menu bar entirely (`Menu.setApplicationMenu(null)`)
-  - Set `titleBarStyle: 'hidden'` for frameless title bar
-  - Added `titleBarOverlay` for Windows with theme-matched colors (`#0f1115` background, `#e6e9ef` symbols)
-  - Empty `title: ''` removes title text and default Electron icon
-  - macOS uses native traffic light buttons (automatically shown with `titleBarStyle: 'hidden'`)
-  - Windows shows minimize/maximize/close overlay buttons in top-right
-  - CSS drag region (`-webkit-app-region: drag`) enables window dragging from content area
-  - 48px top padding accommodates window controls on both platforms
-- **Forced Dark Mode**: App always uses dark theme regardless of system settings
-  - Set `nativeTheme.themeSource = 'dark'` to force dark mode
-  - CSS light mode media query is now ignored
-- **API Key Validation**: Added connectivity test that validates API key against gemini-2.5-flash-lite model
-  - Tests automatically on startup if API key exists
-  - Tests automatically when saving a new key (triggers validation after save)
-  - Manual "Test key" button for on-demand testing
-  - Status indicator shows: "Checking...", "✓ Valid", or "✗ Invalid"
-  - Detailed error messages for invalid keys (format, auth, model access)
-- **Eye Icon Toggle**: Added visibility toggle for API key input field
-  - Click eye icon to show/hide API key
-  - Uses SVG icons (eye open/eye with slash)
-  - Positioned inside the input field on the right
-- **Settings UI cleanup**: Removed card container styling - UI components now sit directly in window without floating rounded box
-- **Shortcut description**: Added global shortcut info (Ctrl+Shift+S) to settings page with styled keyboard keys
-- **Main UI window**: Settings UI is now the primary app window (no separate settings window)
-- **Key storage**: API key stored in OS keychain via keytar, `.env` used only as dev fallback
-- **UI framework**: Lightweight React UI with neutral styling
-- **Tray/menu**: Tray icon with Open/Quit and app menu entry
-- **Build target**: Windows NSIS installer and macOS DMG
-- **Dev tooling**: DevTools auto-open in dev builds
-- **Shell Script for Process Management**: Created `run-gpix.sh` to solve app stopping issue
-  - **Purpose**: Allows stopping the app with Ctrl+C (solves issue where app couldn't be stopped once running)
-  - **Features**: Process ID tracking, signal handling (SIGINT/SIGTERM), automatic cleanup, prevents multiple instances
-  - **Usage**: Run `./run-gpix.sh` to start the app, press Ctrl+C to stop
-  - **PID Management**: Saves process ID to `.gpix.pid` file for tracking and cleanup
-- **Build Configuration**: Added electron-builder for packaging and distribution
-  - **Build target**: Portable executable for Windows (avoids code signing requirements)
-  - **Code signing**: Disabled (`sign: null`, `signDlls: false`) to avoid Windows symlink permission issues
-  - **Build scripts**: Added `build`, `build:win`, `build:mac`, `build:linux`, and `clean-cache` scripts
-  - **Output**: Builds to `dist/` directory as portable `.exe` file
-- **API Token Limit**: Increased `maxOutputTokens` from 256 to 2048 for longer LaTeX outputs
-- **Cursor**: Changed from crosshair to pointer cursor for better visibility
-- **Performance Optimizations**: Speed improvements for Gemini API requests (2-4x faster)
-  - **Model switch**: Changed from `gemini-2.5-flash` to `gemini-2.5-flash-lite` (optimized for speed)
-  - **Image resizing**: Automatically resizes images to max 1024px on longest side (maintains aspect ratio, reduces payload size by 50-80%)
-  - **PNG compression**: Added compression level 6 for optimized file sizes
-  - **API generation config**: `maxOutputTokens: 2048` and `temperature: 0.1` for faster, more deterministic responses
-- **Critical Bug Fixes**: Fixed color accuracy and image sharpness issues
-  - **BGRA to RGBA conversion**: Added color channel swap in capture.js to fix red/blue channel inversion (Electron's `toBitmap()` returns BGRA on Windows, not RGBA)
-  - **Canvas resolution fix**: Set canvas internal resolution to match physical screenshot resolution instead of logical window size (prevents forced scaling/blur)
-  - **Mouse coordinate conversion**: Added `getCanvasCoordinates()` to properly convert CSS pixels to canvas pixels for DPI-scaled displays
-  - **Integer pixel coordinates**: Added rounding in `calculateRect()` to ensure integer pixel values for buffer extraction
-  - **Texture filtering**: Changed from `gl.LINEAR` to `gl.NEAREST` for pixel-perfect rendering without interpolation blur
-- **Phase 2 Implementation Complete**: Gemini API integration fully functional
-- Added dotenv for environment variable management (.env file support)
-- Added sharp library for RGBA to PNG conversion with resizing and compression
-- Created gemini-client.js for API communication (v1 API, gemini-2.5-flash-lite model)
-- Created image-converter.js for buffer to PNG base64 conversion with optimization
-- Created clipboard-handler.js for LaTeX result copying
-- **UX Improvement**: Overlay window now closes immediately after selection (before API call) to prevent freezing
-- Updated API version from v1beta to v1 (stable)
-- Updated model from gemini-1.5-flash to gemini-2.5-flash-lite (deprecated model replaced, optimized for speed)
-- All processing happens in-memory (no file storage)
-- Comprehensive error handling for API failures, network issues, missing keys
+- macOS selection uses a screen-sized `panel`, with native fullscreen disabled. It stays on the current Space without the fullscreen transition, including above fullscreen apps.
+- Overlay bounds use the primary display's origin and size. The screen-saver window level covers the menu bar and Dock; mouse selection and Escape cancellation remain intact.
+- Toast windows disable native shadows and macOS native rounded corners, with an explicitly transparent background. CSS retains the rounded toast, shadow, colors, and fades; the 2.5-second dismissal and non-focusable window remain.
+- Capture checks macOS Screen Recording permission after `desktopCapturer.getSources()`. A missing grant produces an actionable warning instead of a wallpaper/app-only selection overlay.
+- GitHub Actions builds Windows x64 NSIS and separate macOS Intel/Apple Silicon DMGs. Main pushes compile installers; version tags compile and create a draft release with all three installers after successful builds.
+- Package and lockfile versions are 1.0.3; the release tag must match (an optional `v` prefix is supported).
+
+## Verification
+- Native macOS overlay smoke check passed: exact display bounds, no native fullscreen event, all-Spaces panel, drag selection, and Escape cancellation.
+- Native Electron toast check passed for success/error messages, transparent corners, disabled native shadow, no focus stealing, and auto-dismissal.
+- Permission guard checked for denied/not-determined macOS states and normal granted/Windows capture.
+- Actual installed app capture was verified after resetting/regranting its stale macOS permission entry. The installed app has the panel fix; it needs a new build to include the permission guard and toast fix.
+- JavaScript syntax, diff whitespace, and package/lockfile release-version checks passed. Release CI still needs to finish after the tag is pushed.
+
+## Decisions and Operational Guidance
+- Preserve screenshot selection behavior while avoiding macOS native fullscreen Spaces.
+- `CommandOrControl+Shift+S` means Cmd+Shift+S on macOS and Ctrl+Shift+S on Windows/Linux.
+- Ad-hoc Mac signing is configured; Developer ID signing and notarization remain unconfigured.
+- A permission toggle can appear enabled while capture is denied after replacing an ad-hoc-signed app. Fully quit/reopen first; a targeted ScreenCapture reset and re-adding the exact installed app restored capture in this session.
+- Inspect the normally launched app when debugging permissions: a directly spawned diagnostic process reported a different permission state during this investigation.
+- Always set `AI_AGENT=true` for project commands. Stop immediately if a command reports that execution was stopped to prevent production operations.
+- `.cursor/01-memory.mdc` governs ongoing project work and memory-bank updates: read all bank files, then document current state, next steps, and relevant decisions.
 
 ## Next Steps
-**Follow-ups**
-1. Revisit security: re-enable contextIsolation and remove nodeIntegration for main UI
-2. Add app icons (tray/app) for dev and build assets
-3. Optional: add shortcut customization UI
-4. Optional: make `titleBarOverlay` colors adapt to system light/dark theme
-
-## Key Decisions Made
-
-### Screenshot Library
-- **Chosen:** Electron's `desktopCapturer` API
-- **Reason:** Built-in, no external dependencies
-
-### Rendering Approach
-- **Chosen:** WebGL with custom shaders
-- **Reason:** GPU-accelerated, minimal CPU overhead, smooth 60 FPS
-
-### DPI Scaling
-- **Chosen:** Native `screen.getPrimaryDisplay().scaleFactor`
-- **Reason:** No hardcoding, automatic detection, pixel-perfect accuracy
-
-### API Integration
-- **Chosen:** Google Gemini API v1 with gemini-2.5-flash-lite model
-- **Reason:** Fastest model for equation-to-LaTeX conversion, optimized for speed and cost, maintains accuracy for mathematical content
-- **Generation Config:** `maxOutputTokens: 256`, `temperature: 0.1` (optimized for fast, deterministic LaTeX output)
-- **Alternative models available:** gemini-2.5-flash (balanced), gemini-2.5-pro (better accuracy, slower)
-
-### Image Conversion
-- **Chosen:** sharp library for RGBA to PNG conversion with automatic optimization
-- **Reason:** Fast, native bindings, well-maintained, efficient memory usage
-- **Optimizations:** Automatic resizing to max 1024px (longest side), PNG compression level 6, maintains aspect ratio
-- **Result:** 50-80% smaller payloads for large selections, faster API processing
-
-### Result Delivery
-- **Chosen:** Clipboard copy (automatic)
-- **Reason:** Seamless integration, user can paste anywhere immediately
-
-### Environment Configuration
-- **Chosen:** dotenv package with .env file
-- **Reason:** Standard approach, keeps API key out of code, easy to configure
-
-### Build & Distribution
-- **Chosen:** electron-builder with portable format for Windows
-- **Reason:** Portable format avoids code signing requirements and Windows symlink permission issues
-- **Configuration:** Code signing disabled, outputs standalone executable to `dist/` directory
-- **Build command:** `npm run build` creates portable `.exe` file
-
-## Important Patterns & Preferences
-- Modular structure: capture, overlay, extraction, API, image conversion, clipboard separated
-- Security: context isolation, preload script, API key in environment variable
-- One-shot capture: screenshot taken once, texture uploaded once
-- Clean state machine: idle → capturing → selecting → processing → idle
-- Resource management: cleanup on ESC and completion
-- Immediate UX: overlay closes before API call to prevent UI freezing
-- In-memory processing: all image data stays in memory, no file I/O
-
-## Learnings & Insights
-- WebGL texture upload is one-time; uniforms update during drag
-- DPI scaling requires logical → physical coordinate mapping
-- ESC handler needs capture phase for highest priority
-- Small selections (< 5x5) should be filtered
-- Hidden window required to maintain global shortcut
-- **WebGL coordinate system**: Bitmap data from `toBitmap()` has top-left origin, but WebGL textures use bottom-left origin - must flip Y in vertex shader (`v_texCoord.y = 1.0 - texCoord.y`)
-- **Selection coordinate mapping**: After Y-flip in vertex shader, fragment shader texture coordinates match screen coordinates (top-left origin), so selection rectangles use screen coordinates directly
-- **Global shortcut registration**: `globalShortcut.register()` can return `false` even when the shortcut is actually registered and working - check actual behavior rather than just return value
-- **Gemini API model deprecation**: gemini-1.5-flash was deprecated, switched to gemini-2.5-flash with v1 API
-- **Overlay UX**: Closing overlay immediately after selection prevents perceived freezing during API calls (1-3 second delay)
-- **dotenv configuration**: Must be required at the very top of main.js before any other code that uses process.env
-- **Image format**: Gemini API accepts PNG via inline_data with mime_type 'image/png' and base64 data
-- **Image optimization**: Images automatically resized to max 1024px on longest side for faster processing (1024px is sufficient for equation recognition while reducing payload size significantly)
-- **API performance**: Using gemini-2.5-flash-lite with generationConfig (maxOutputTokens: 256, temperature: 0.1) results in 2-4x faster response times compared to previous configuration
-- **Electron color format**: `toBitmap()` returns BGRA format on Windows (not RGBA) - must swap red/blue channels before processing
-- **Canvas resolution vs CSS size**: Canvas internal resolution (width/height) must match physical screenshot resolution for pixel-perfect rendering; CSS size (style.width/height) controls display size
-- **Mouse coordinate conversion**: Mouse events use CSS pixels; must convert to canvas coordinates using `(mouseX * canvas.width) / canvas.offsetWidth` for DPI-scaled displays
-- **Pixel-perfect rendering**: Use `gl.NEAREST` filtering (not `gl.LINEAR`) to prevent interpolation blur when rendering screenshots
-- **Integer pixel boundaries**: All pixel coordinates for buffer extraction must be integers - round floating-point values from coordinate calculations
-
+- Check the 1.0.3 tag workflow and generated draft release; publication is a separate action.
+- Validate the new installed Mac build with Cmd+Shift+S, region selection, clipboard output, and toast appearance. Regrant Screen Recording permission if replacement invalidates it.
+- Main settings UI still uses `nodeIntegration: true` and `contextIsolation: false`; harden it with preload/bundling in a separate change.
+- Optional future work: multiple monitors and shortcut customization.
