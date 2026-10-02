@@ -180,6 +180,9 @@ physicalX = Math.round(logicalX * scaleFactor);
 - Visual feedback during processing
 
 ## Build & Distribution
+
+Full workflow, release procedure, local build commands, and Mac format/signing decisions: [Builds and Releases](build-and-releases.md).
+
 - **Build Tool:** electron-builder v24.9.1
 - **Windows Target:** NSIS installer (`.exe`)
 - **Code Signing:** Disabled (avoids Windows symlink permission issues)

@@ -4,6 +4,7 @@
 Release 1.0.3: macOS selection overlay and toast window rendering fixes.
 
 ## Recent Changes
+- README build/release documentation is now a short summary; full commands, workflow, and Mac packaging decisions live in [build-and-releases.md](build-and-releases.md).
 - macOS selection uses a screen-sized `panel`, with native fullscreen disabled. It stays on the current Space without the fullscreen transition, including above fullscreen apps.
 - Overlay bounds use the primary display's origin and size. The screen-saver window level covers the menu bar and Dock; mouse selection and Escape cancellation remain intact.
 - Toast windows disable native shadows and macOS native rounded corners, with an explicitly transparent background. CSS retains the rounded toast, shadow, colors, and fades; the 2.5-second dismissal and non-focusable window remain.
