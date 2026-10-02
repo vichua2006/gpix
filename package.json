@@ -1,6 +1,6 @@
 {
   "name": "gpix",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Screenshot capture with interactive region selection for equation-to-LaTeX conversion",
   "main": "src/main/main.js",
   "scripts": {
