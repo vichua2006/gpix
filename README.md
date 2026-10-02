@@ -24,7 +24,24 @@ why pay 6 dollars a month for Mathpix when you can use a Gemini wrapper? 😋
 
 ## Installation
 
-Download the latest installer from the [GitHub Releases](https://github.com/vichua2006/gpix/releases) page and run `gpix Setup x.x.x.exe`.
+Download the installer for your platform from [GitHub Releases](https://github.com/vichua2006/gpix/releases):
+
+- **Windows:** run `gpix Setup x.x.x.exe`.
+- **macOS:** choose `gpix-x.x.x-arm64.dmg` for Apple Silicon or `gpix-x.x.x-x64.dmg` for Intel. Open the DMG and drag gpix into Applications.
+
+Mac builds use ad-hoc signing until Apple Developer ID signing and notarization are configured. Downloaded builds can trigger Gatekeeper; if you trust the build, follow Apple's [Open Anyway instructions](https://support.apple.com/en-us/102445). Allow gpix in **System Settings → Privacy & Security → Screen Recording** (called **Screen & System Audio Recording** on newer macOS versions), then quit and reopen it if prompted. The Mac capture shortcut is **Command + Shift + S**.
+
+## Builds and releases
+
+GitHub Actions builds Windows x64 and separate Mac Intel/Apple Silicon installers on pushes to `main`, pull requests to `main`, and manual runs. Each job runs `npm ci`, checks JavaScript syntax, and packages with electron-builder. Mac jobs also verify bundle signatures and load the packaged `keytar` and `sharp` native modules. Installers are available under the run's **Artifacts** for 14 days. This verifies packaging; screenshot capture and Gemini conversion still need a manual app check.
+
+Pushing a version tag (`v1.0.2` or `1.0.2`) builds all three installers and attaches them to a **draft GitHub release** after every build succeeds. The tag must match `package.json`'s version; the existing `1.0.1` release has a `1.0.0` installer, so future releases should keep them aligned. Review and publish the draft from GitHub Releases.
+
+For the next release, bump the package and lockfile version with `npm version 1.0.2 --no-git-tag-version`, commit the change, then tag that commit and push the branch/tag when ready.
+
+Local builds: `npm ci`, then `npm run build:win` or `npm run build:mac`. Use `npm run build:mac -- dmg --arm64 --publish never` or `npm run build:mac -- dmg --x64 --publish never` to build one Mac architecture. Outputs go to `dist/`. CI builds each Mac architecture on a matching runner because `keytar` and `sharp` contain native binaries.
+
+DMG is the default for drag-to-Applications installation. ZIP is useful for portable distribution or future auto-update payloads; PKG is useful for managed deployments. A universal DMG can cover both Mac architectures in one download, but requires merging and checking both native dependency sets. Separate DMGs keep downloads smaller and builds simpler. None of these formats replaces Apple signing/notarization. To enable trusted Mac releases, configure `CSC_LINK`/`CSC_KEY_PASSWORD` and Apple's notarization credentials in a protected release build; keep PR builds limited to ad-hoc signing.
 
 ## Usage
 
@@ -55,4 +72,3 @@ Press <kbd>ESC</kbd> at any time to cancel the selection.
 
 # Liscense
 MIT
-

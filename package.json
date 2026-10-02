@@ -37,8 +37,14 @@
     "directories": {
       "output": "dist"
     },
+    "asarUnpack": [
+      "node_modules/@img/**/*",
+      "node_modules/sharp/**/*",
+      "node_modules/keytar/**/*"
+    ],
     "files": [
       "src/**/*",
+      "build/icon.png",
       "package.json",
       "node_modules/**/*"
     ],
@@ -55,6 +61,9 @@
       "signDlls": false
     },
     "mac": {
+      "artifactName": "${productName}-${version}-${arch}.${ext}",
+      "icon": "build/icon.png",
+      "sign": "build/sign-mac.js",
       "target": [
         {
           "target": "dmg",

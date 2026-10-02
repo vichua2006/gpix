@@ -1,0 +1,103 @@
+name: Build installers
+
+on:
+  push:
+    branches: [main]
+    tags: ['v[0-9]*', '[0-9]*']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build ${{ matrix.platform }} ${{ matrix.arch }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            platform: win
+            arch: x64
+            target: nsis
+          - os: macos-15-intel
+            platform: mac
+            arch: x64
+            target: dmg
+          - os: macos-15
+            platform: mac
+            arch: arm64
+            target: dmg
+    env:
+      AI_AGENT: 'true'
+      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      # No certificates or secrets: PR builds use only the ad-hoc signing hook.
+      CSC_FOR_PULL_REQUEST: 'true'
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Check release version
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          node -e 'const version = require("./package.json").version; if (process.env.RELEASE_TAG.replace(/^v/, "") !== version) { throw new Error("Release tag must match package.json version " + version); }'
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Check JavaScript syntax
+        run: |
+          for file in src/main/*.js src/renderer/*.js build/sign-mac.js; do
+            node --check "$file"
+          done
+      - name: Build installer
+        run: npm run build:${{ matrix.platform }} -- ${{ matrix.target }} --${{ matrix.arch }} --publish never
+      - name: Verify Mac bundle and native modules
+        if: matrix.platform == 'mac'
+        run: |
+          if [ '${{ matrix.arch }}' = 'arm64' ]; then
+            app='dist/mac-arm64/gpix.app'
+          else
+            app='dist/mac/gpix.app'
+          fi
+          codesign --verify --deep --strict --verbose=2 "$app"
+          ELECTRON_RUN_AS_NODE=1 "$app/Contents/MacOS/gpix" -e 'const path = require("path"); const root = path.resolve(process.argv[1], "Contents/Resources/app.asar"); require(path.join(root, "node_modules/keytar")); const sharp = require(path.join(root, "node_modules/sharp")); sharp({ create: { width: 1, height: 1, channels: 4, background: "white" } }).png().toBuffer().then(() => console.log("Native modules loaded:", process.arch));' "$app"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: gpix-${{ matrix.platform }}-${{ matrix.arch }}
+          path: |
+            dist/*.exe
+            dist/*.dmg
+          if-no-files-found: error
+          retention-days: 14
+
+  release:
+    name: Draft GitHub release
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: gpix-*
+          path: installers
+          merge-multiple: true
+      - name: Create draft with all installers
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$RELEASE_TAG" installers/* \
+            --verify-tag --draft --title "gpix $RELEASE_TAG" --generate-notes
